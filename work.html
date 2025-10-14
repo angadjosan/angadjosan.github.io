@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work — Angad Singh Josan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #0a0a0a; color: #e0e0e0; line-height: 1.6; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .container { max-width: 1000px; width: 100%; }
+        header { display:flex; align-items:center; gap:20px; margin-bottom:28px; flex-wrap:wrap; }
+        header h1 { font-size:2.4rem; color:#fff; font-weight:700; }
+        header p.tagline { color:#a0a0a0; font-weight:600; margin-top:6px; }
+        .nav-links { display:flex; gap:8px; margin-left:auto; align-items:center; }
+        .nav-links a { color:#a0a0a0; text-decoration:none; padding:8px 10px; border-radius:6px; transition: all 0.15s ease; }
+        .nav-links a:hover { color:#6b9eff; background-color: rgba(255,255,255,0.03); transform: translateY(-2px); }
+        .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:18px; }
+        .card { background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); padding:18px; border-radius:12px; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 6px 30px rgba(0,0,0,0.6); }
+        .card h3 { font-size:1.15rem; color:#fff; margin-bottom:6px; }
+        .muted { color:#a0a0a0; font-size:0.95rem; margin-bottom:10px; }
+        .desc { color:#cfcfcf; font-size:0.98rem; line-height:1.5; }
+        .card .meta { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:8px; }
+        .card a.more { color:#6b9eff; text-decoration:none; font-weight:600; }
+        @media (max-width:900px) { .grid { grid-template-columns: 1fr; } header h1 { font-size:1.8rem; } }
+        @media (max-width:480px) { body { padding:14px; align-items:flex-start; padding-top:28px; } header { flex-direction:column; align-items:flex-start; } .nav-links { width:100%; justify-content:flex-start; gap:6px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Work</h1>
+                <p class="tagline">Professional experience, internships, and notable roles</p>
+            </div>
+
+            <nav class="nav-links">
+                <a href="index.html">home</a>
+                <a href="work.html">work</a>
+                <a href="projects.html">projects</a>
+                <a href="academics.html">academics</a>
+                <a href="writings.html">writings</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="grid">
+                <article class="card">
+                    <div class="meta">
+                        <div>
+                            <h3>Software Engineering Intern — Acme AI</h3>
+                            <div class="muted">Summer 2024</div>
+                        </div>
+                        <div class="muted">Remote</div>
+                    </div>
+                    <p class="desc">Built backend services and data ingestion pipelines to support model training workflows. Improved throughput and reduced inference latency for internal tools.</p>
+                    <p style="margin-top:10px;"><a class="more" href="#">Case study →</a></p>
+                </article>
+
+                <article class="card">
+                    <div class="meta">
+                        <div>
+                            <h3>Product Analyst — Startup X</h3>
+                            <div class="muted">2023–2024</div>
+                        </div>
+                        <div></div>
+                    </div>
+                    <p class="desc">Worked across engineering and ops to define metrics, evaluate experiments, and ship product improvements focused on user activation and retention.</p>
+                </article>
+
+                <article class="card">
+                    <div class="meta">
+                        <div>
+                            <h3>Founder — Side Project</h3>
+                            <div class="muted">2022–Present</div>
+                        </div>
+                        <div class="muted">Built with React • Go</div>
+                    </div>
+                    <p class="desc">Launched a small consumer product; responsible for product design, engineering, and go-to-market. Grew to X monthly users (select metric) and iterated on product-market fit.</p>
+                </article>
+
+                <article class="card">
+                    <div class="meta">
+                        <div>
+                            <h3>Freelance Engineering</h3>
+                            <div class="muted">2021–2023</div>
+                        </div>
+                        <div></div>
+                    </div>
+                    <p class="desc">Delivered web and tooling projects for small teams, including data dashboards, automation scripts, and prototype front-ends.</p>
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
