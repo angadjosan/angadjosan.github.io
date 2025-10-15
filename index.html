@@ -13,6 +13,7 @@
 
         html {
             scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
             /* Performance optimizations */
             scroll-padding-top: 50px;
             scroll-padding-bottom: 0;
@@ -23,7 +24,6 @@
         
         /* Fix scroll snap offset issues */
         body {
-            scroll-snap-type: y mandatory;
             /* Ensure consistent scroll behavior */
             overflow-x: hidden;
         }
@@ -34,6 +34,7 @@
             scroll-snap-align: start;
             scroll-snap-stop: always;
         }
+        
         
         /* Respect reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
@@ -73,6 +74,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            scroll-snap-align: start;
         }
 
         /* Center the intro `.container` vertically and horizontally */
@@ -390,6 +392,8 @@
         /* Ensure last section has enough space to snap properly */
         section:last-child {
             margin-bottom: 100vh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
         }
         
         /* Scroll indicator for better UX */
@@ -618,6 +622,17 @@
                 };
                 
                 window.addEventListener('scroll', handleScroll, { passive: true });
+                
+                // Additional handler for scroll-snap completion
+                let scrollTimeout;
+                const handleScrollEnd = () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        this.updateActiveSection();
+                    }, 100);
+                };
+                
+                window.addEventListener('scroll', handleScrollEnd, { passive: true });
             }
             
             updateScrollState() {
@@ -672,13 +687,19 @@
                 });
                 
                 if (activeSection) {
-                    history.replaceState(null, null, '#' + activeSection.id);
+                    // Update URL hash immediately when section is active
+                    const newHash = '#' + activeSection.id;
+                    if (window.location.hash !== newHash) {
+                        history.replaceState(null, null, newHash);
+                    }
                 } else if (scrollY > topbarOffset) {
                     const homeContainer = document.querySelector('#home');
                     if (homeContainer) {
                         const homeRect = homeContainer.getBoundingClientRect();
                         if (homeRect.top <= topbarOffset && homeRect.bottom > topbarOffset) {
-                            history.replaceState(null, null, window.location.pathname);
+                            if (window.location.hash !== '') {
+                                history.replaceState(null, null, window.location.pathname);
+                            }
                         }
                     }
                 }
@@ -697,6 +718,13 @@
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             entry.target.classList.add('in-view');
+                            // Update URL hash when section comes into view
+                            if (entry.target.id) {
+                                const newHash = '#' + entry.target.id;
+                                if (window.location.hash !== newHash) {
+                                    history.replaceState(null, null, newHash);
+                                }
+                            }
                         } else {
                             entry.target.classList.remove('in-view');
                         }
