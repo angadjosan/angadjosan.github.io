@@ -14,6 +14,25 @@
         html {
             scroll-behavior: smooth;
             scroll-snap-type: y mandatory;
+            /* Performance optimizations */
+            scroll-padding-top: 0;
+            scroll-padding-bottom: 0;
+            /* Better scroll performance */
+            -webkit-overflow-scrolling: touch;
+            /* Respect user's motion preferences */
+        }
+        
+        /* Respect reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         body {
@@ -295,27 +314,95 @@
             transition: opacity 260ms ease, transform 260ms ease;
         }
 
-        /* Section styling with scroll snap */
+        /* Section styling with scroll snap and animations */
         section {
             min-height: 100vh;
             scroll-snap-align: start;
             padding: 40px 20px;
             box-sizing: border-box;
+            /* Performance optimizations */
+            will-change: transform, opacity;
+            /* Initial state for animations */
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
+        
+        /* Animate sections when they come into view */
+        section.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Stagger animations for better visual flow */
+        section:nth-child(1).in-view { transition-delay: 0.1s; }
+        section:nth-child(2).in-view { transition-delay: 0.2s; }
+        section:nth-child(3).in-view { transition-delay: 0.3s; }
+        section:nth-child(4).in-view { transition-delay: 0.4s; }
 
         section h2 {
             color: #fff;
             margin-bottom: 12px;
+            /* Subtle animation for headings */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s;
+        }
+        
+        section.in-view h2 {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         section p {
             color: #c0c0c0;
             max-width: 800px;
+            /* Subtle animation for paragraphs */
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.5s ease-out 0.4s, transform 0.5s ease-out 0.4s;
+        }
+        
+        section.in-view p {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Ensure last section has enough space to snap properly */
         section:last-child {
             margin-bottom: 100vh;
+        }
+        
+        /* Scroll indicator for better UX */
+        .scroll-indicator {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .scroll-indicator.visible {
+            opacity: 1;
+        }
+        
+        .scroll-indicator::before {
+            content: '';
+            display: block;
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, #6b9eff, transparent);
+            border-radius: 1px;
+        }
+        
+        /* Hide scroll indicator on mobile */
+        @media (max-width: 768px) {
+            .scroll-indicator {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -404,89 +491,295 @@
             <p>Placeholder for writing content.</p>
         </section>
     </main>
+    
+    <!-- Scroll indicator for better UX -->
+    <div class="scroll-indicator" aria-hidden="true"></div>
 
     <script>
-        const topbar = document.querySelector('.topbar');
-        const container = document.querySelector('.container');
-        
-        // Handle navigation clicks for both nav-links and topbar-links
-        document.querySelectorAll('.nav-links a, .topbar-links a').forEach(a => {
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
+        // Modern scroll optimization with performance best practices
+        class ScrollManager {
+            constructor() {
+                this.topbar = document.querySelector('.topbar');
+                this.container = document.querySelector('.container');
+                this.sections = document.querySelectorAll('section[id]');
+                this.scrollIndicator = document.querySelector('.scroll-indicator');
+                this.isScrolling = false;
+                this.scrollTimeout = null;
+                this.lastScrollY = 0;
+                this.scrollDirection = 'down';
                 
-                const href = a.getAttribute('href');
+                // Check for reduced motion preference
+                this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                 
-                // Handle home link (empty href)
+                this.init();
+            }
+            
+            init() {
+                this.setupNavigation();
+                this.setupScrollOptimization();
+                this.setupIntersectionObserver();
+                this.setupKeyboardNavigation();
+                this.handleInitialHash();
+            }
+            
+            setupNavigation() {
+                // Handle navigation clicks for both nav-links and topbar-links
+                document.querySelectorAll('.nav-links a, .topbar-links a').forEach(a => {
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleNavigation(a.getAttribute('href'));
+                    });
+                });
+            }
+            
+            handleNavigation(href) {
+                // Handle home link
                 if (href === '' || href === '#' || href === '#home') {
-                    // Go back to home - remove navbar and scroll to top
-                    document.body.classList.remove('with-navbar');
-                    // Clear the URL hash to show just index.html
-                    history.replaceState(null, null, window.location.pathname);
-                    const homeContainer = document.querySelector('#home');
-                    if (homeContainer) {
-                        homeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    } else {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
+                    this.navigateToHome();
                 } else if (href && href.startsWith('#')) {
-                    // Handle section links
-                    document.body.classList.add('with-navbar');
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    this.navigateToSection(href);
                 }
-            });
-        });
-        
-        // Handle hash navigation on page load
-        if (window.location.hash) {
-            const target = document.querySelector(window.location.hash);
-            if (target) {
-                topbar.classList.add('visible');
-                document.body.classList.add('with-navbar');
-                setTimeout(() => {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 50 );
             }
-        }
-        
-        // Show/hide navbar based on scroll position and update URL hash
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 400) {
-                topbar.classList.add('visible');
-                document.body.classList.add('with-navbar');
-            } else {
-                topbar.classList.remove('visible');
+            
+            navigateToHome() {
                 document.body.classList.remove('with-navbar');
-                // Clear hash when at the top (home section)
-                if (window.scrollY < 100) {
-                    history.replaceState(null, null, window.location.pathname);
-                }
-            }
-            
-            // Update URL hash based on current section
-            const sections = document.querySelectorAll('section[id]');
-            let inSection = false;
-            sections.forEach(section => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top <= 100 && rect.bottom > 100) {
-                    history.replaceState(null, null, '#' + section.id);
-                    inSection = true;
-                }
-            });
-            
-            // If not in any section and scrolled past the intro, clear the hash
-            if (!inSection && window.scrollY > 100) {
+                history.replaceState(null, null, window.location.pathname);
                 const homeContainer = document.querySelector('#home');
                 if (homeContainer) {
-                    const homeRect = homeContainer.getBoundingClientRect();
-                    if (homeRect.top <= 100 && homeRect.bottom > 100) {
+                    this.smoothScrollTo(homeContainer);
+                } else {
+                    this.smoothScrollToTop();
+                }
+            }
+            
+            navigateToSection(href) {
+                document.body.classList.add('with-navbar');
+                const target = document.querySelector(href);
+                if (target) {
+                    this.smoothScrollTo(target);
+                }
+            }
+            
+            smoothScrollTo(element) {
+                if (this.prefersReducedMotion) {
+                    element.scrollIntoView({ behavior: 'auto', block: 'start' });
+                } else {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            
+            smoothScrollToTop() {
+                if (this.prefersReducedMotion) {
+                    window.scrollTo({ top: 0, behavior: 'auto' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+            
+            setupScrollOptimization() {
+                // Throttled scroll handler using requestAnimationFrame for better performance
+                let ticking = false;
+                
+                const handleScroll = () => {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            this.updateScrollState();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                };
+                
+                window.addEventListener('scroll', handleScroll, { passive: true });
+            }
+            
+            updateScrollState() {
+                const currentScrollY = window.scrollY;
+                this.scrollDirection = currentScrollY > this.lastScrollY ? 'down' : 'up';
+                this.lastScrollY = currentScrollY;
+                
+                // Update navbar visibility
+                if (currentScrollY > 400) {
+                    this.topbar.classList.add('visible');
+                    document.body.classList.add('with-navbar');
+                } else {
+                    this.topbar.classList.remove('visible');
+                    document.body.classList.remove('with-navbar');
+                    if (currentScrollY < 100) {
                         history.replaceState(null, null, window.location.pathname);
                     }
                 }
+                
+                // Update scroll indicator
+                this.updateScrollIndicator(currentScrollY);
+                
+                // Update URL hash based on current section
+                this.updateActiveSection();
             }
+            
+            updateScrollIndicator(scrollY) {
+                if (this.scrollIndicator) {
+                    const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const scrollProgress = Math.min(scrollY / documentHeight, 1);
+                    
+                    // Show indicator when scrolled past intro
+                    if (scrollY > 200) {
+                        this.scrollIndicator.classList.add('visible');
+                    } else {
+                        this.scrollIndicator.classList.remove('visible');
+                    }
+                }
+            }
+            
+            updateActiveSection() {
+                let activeSection = null;
+                const scrollY = window.scrollY;
+                
+                this.sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 100 && rect.bottom > 100) {
+                        activeSection = section;
+                    }
+                });
+                
+                if (activeSection) {
+                    history.replaceState(null, null, '#' + activeSection.id);
+                } else if (scrollY > 100) {
+                    const homeContainer = document.querySelector('#home');
+                    if (homeContainer) {
+                        const homeRect = homeContainer.getBoundingClientRect();
+                        if (homeRect.top <= 100 && homeRect.bottom > 100) {
+                            history.replaceState(null, null, window.location.pathname);
+                        }
+                    }
+                }
+            }
+            
+            setupIntersectionObserver() {
+                // Use IntersectionObserver for better performance
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px',
+                    threshold: 0.1
+                };
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in-view');
+                        } else {
+                            entry.target.classList.remove('in-view');
+                        }
+                    });
+                }, observerOptions);
+                
+                // Observe all sections for scroll-triggered animations
+                this.sections.forEach(section => {
+                    observer.observe(section);
+                });
+            }
+            
+            setupKeyboardNavigation() {
+                // Add keyboard navigation support
+                document.addEventListener('keydown', (e) => {
+                    // Only handle if no input/textarea is focused
+                    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                        return;
+                    }
+                    
+                    switch(e.key) {
+                        case 'ArrowDown':
+                        case 'PageDown':
+                        case ' ': // Spacebar
+                            e.preventDefault();
+                            this.scrollToNextSection();
+                            break;
+                        case 'ArrowUp':
+                        case 'PageUp':
+                            e.preventDefault();
+                            this.scrollToPreviousSection();
+                            break;
+                        case 'Home':
+                            e.preventDefault();
+                            this.navigateToHome();
+                            break;
+                        case 'End':
+                            e.preventDefault();
+                            this.scrollToLastSection();
+                            break;
+                    }
+                });
+            }
+            
+            scrollToNextSection() {
+                const currentSection = this.getCurrentSection();
+                if (currentSection) {
+                    const nextSection = currentSection.nextElementSibling;
+                    if (nextSection && nextSection.tagName === 'SECTION') {
+                        this.smoothScrollTo(nextSection);
+                    }
+                } else {
+                    // If not in a section, go to first section
+                    const firstSection = document.querySelector('section');
+                    if (firstSection) {
+                        this.smoothScrollTo(firstSection);
+                    }
+                }
+            }
+            
+            scrollToPreviousSection() {
+                const currentSection = this.getCurrentSection();
+                if (currentSection) {
+                    const prevSection = currentSection.previousElementSibling;
+                    if (prevSection && prevSection.tagName === 'SECTION') {
+                        this.smoothScrollTo(prevSection);
+                    } else {
+                        // Go to home if at first section
+                        this.navigateToHome();
+                    }
+                }
+            }
+            
+            scrollToLastSection() {
+                const lastSection = document.querySelector('section:last-of-type');
+                if (lastSection) {
+                    this.smoothScrollTo(lastSection);
+                }
+            }
+            
+            getCurrentSection() {
+                for (let section of this.sections) {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 100 && rect.bottom > 100) {
+                        return section;
+                    }
+                }
+                return null;
+            }
+            
+            handleInitialHash() {
+                if (window.location.hash) {
+                    const target = document.querySelector(window.location.hash);
+                    if (target) {
+                        this.topbar.classList.add('visible');
+                        document.body.classList.add('with-navbar');
+                        setTimeout(() => {
+                            this.smoothScrollTo(target);
+                        }, 50);
+                    }
+                }
+            }
+        }
+        
+        // Initialize scroll manager when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new ScrollManager();
         });
+        
+        // Fallback for older browsers
+        if (!window.IntersectionObserver) {
+            console.warn('IntersectionObserver not supported, using fallback scroll handling');
+        }
     </script>
 </body>
 </html>
