@@ -11,6 +11,11 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             background-color: #0a0a0a;
@@ -48,6 +53,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            scroll-snap-align: start;
         }
 
         /* When the navbar is visible, reduce the available height so container remains centered beneath the bar */
@@ -288,12 +294,35 @@
             pointer-events: none;
             transition: opacity 260ms ease, transform 260ms ease;
         }
+
+        /* Section styling with scroll snap */
+        section {
+            min-height: 100vh;
+            scroll-snap-align: start;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        section h2 {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        section p {
+            color: #c0c0c0;
+            max-width: 800px;
+        }
+
+        /* Ensure last section has enough space to snap properly */
+        section:last-child {
+            margin-bottom: 100vh;
+        }
     </style>
 </head>
 <body>
     <header class="topbar" aria-hidden="true">
         <nav class="topbar-links">
-            <a href="">home</a>
+            <a href="#home">home</a>
             <a href="#work">work</a>
             <a href="#projects">projects</a>
             <a href="#academics">academics</a>
@@ -311,7 +340,7 @@
             </a>
         </div>
     </header>
-    <div class="container">
+    <div class="container" id="home">
                 <div class="profile-section">
                                         <img src="images/headshot-4x.jpg"
                                     width="192" height="240"
@@ -355,189 +384,109 @@
 
     <main id="main-content">
 
-        <section id="work" style="min-height:80vh; padding:40px 20px;">
-            <h2 style="color:#fff; margin-bottom:12px;">Work</h2>
-            <p style="color:#c0c0c0; max-width:800px;">Placeholder for work content.</p>
+        <section id="work">
+            <h2>Work</h2>
+            <p>Placeholder for work content.</p>
         </section>
 
-        <section id="projects" style="min-height:80vh; padding:40px 20px;">
-            <h2 style="color:#fff; margin-bottom:12px;">Projects</h2>
-            <p style="color:#c0c0c0; max-width:800px;">Placeholder for projects content.</p>
+        <section id="projects">
+            <h2>Projects</h2>
+            <p>Placeholder for projects content.</p>
         </section>
 
-        <section id="academics" style="min-height:80vh; padding:40px 20px;">
-            <h2 style="color:#fff; margin-bottom:12px;">Academics</h2>
-            <p style="color:#c0c0c0; max-width:800px;">Placeholder for academics content.</p>
+        <section id="academics">
+            <h2>Academics</h2>
+            <p>Placeholder for academics content.</p>
         </section>
 
-        <section id="writings" style="min-height:80vh; padding:40px 20px;">
-            <h2 style="color:#fff; margin-bottom:12px;">Writings</h2>
-            <p style="color:#c0c0c0; max-width:800px;">Placeholder for writings content.</p>
+        <section id="writings">
+            <h2>Writings</h2>
+            <p>Placeholder for writing content.</p>
         </section>
     </main>
 
     <script>
-        // When any of the intro buttons/links are clicked, reveal the top navbar,
-        // hide the centered intro container, and smooth-scroll the page so the
-        // main content is visible with the navbar bound to the top center.
-        (function(){
-            const topbar = document.querySelector('.topbar');
-            const container = document.querySelector('.container');
-            const body = document.body;
-            let suppressObservers = false; // when true observers won't react (used during user-initiated animation)
-
-            function activateNavbarAndScroll(targetHash) {
-                // Prevent observers from reacting while we animate programmatically
-                suppressObservers = true;
-                setTimeout(() => { suppressObservers = false; }, 1100);
-
-                // Reveal the topbar and adjust body layout
+        const topbar = document.querySelector('.topbar');
+        const container = document.querySelector('.container');
+        
+        // Handle navigation clicks for both nav-links and topbar-links
+        document.querySelectorAll('.nav-links a, .topbar-links a').forEach(a => {
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const href = a.getAttribute('href');
+                
+                // Handle home link (empty href)
+                if (href === '' || href === '#' || href === '#home') {
+                    // Go back to home - remove navbar and scroll to top
+                    document.body.classList.remove('with-navbar');
+                    // Clear the URL hash to show just index.html
+                    history.replaceState(null, null, window.location.pathname);
+                    const homeContainer = document.querySelector('#home');
+                    if (homeContainer) {
+                        homeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                } else if (href && href.startsWith('#')) {
+                    // Handle section links
+                    document.body.classList.add('with-navbar');
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+        
+        // Handle hash navigation on page load
+        if (window.location.hash) {
+            const target = document.querySelector(window.location.hash);
+            if (target) {
                 topbar.classList.add('visible');
-                body.classList.add('with-navbar');
-
-                // Animate hiding the intro container
-                container.classList.add('intro-hide');
-                // After the transition, remove from flow
+                document.body.classList.add('with-navbar');
                 setTimeout(() => {
-                    container.style.display = 'none';
-                }, 300);
-
-                // Scroll to the requested target (if any) with offset to account for the topbar.
-                // This replaces multiple staggered scrolls that caused bouncing.
-                if (targetHash) {
-                    const el = document.querySelector(targetHash);
-                    if (el) {
-                        setTimeout(() => {
-                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
-                            const targetY = window.scrollY + el.getBoundingClientRect().top - (topOffset + 8);
-                            window.scrollTo({ top: targetY, behavior: 'smooth' });
-                        }, 120); // small delay so classes apply
-                    }
-                } else {
-                    // default: scroll to main content area
-                    const main = document.querySelector('#main-content');
-                    if (main) {
-                        setTimeout(() => {
-                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
-                            const targetY = window.scrollY + main.getBoundingClientRect().top - (topOffset + 8);
-                            window.scrollTo({ top: targetY, behavior: 'smooth' });
-                        }, 120);
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50 );
+            }
+        }
+        
+        // Show/hide navbar based on scroll position and update URL hash
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                topbar.classList.add('visible');
+                document.body.classList.add('with-navbar');
+            } else {
+                topbar.classList.remove('visible');
+                document.body.classList.remove('with-navbar');
+                // Clear hash when at the top (home section)
+                if (window.scrollY < 100) {
+                    history.replaceState(null, null, window.location.pathname);
+                }
+            }
+            
+            // Update URL hash based on current section
+            const sections = document.querySelectorAll('section[id]');
+            let inSection = false;
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 100 && rect.bottom > 100) {
+                    history.replaceState(null, null, '#' + section.id);
+                    inSection = true;
+                }
+            });
+            
+            // If not in any section and scrolled past the intro, clear the hash
+            if (!inSection && window.scrollY > 100) {
+                const homeContainer = document.querySelector('#home');
+                if (homeContainer) {
+                    const homeRect = homeContainer.getBoundingClientRect();
+                    if (homeRect.top <= 100 && homeRect.bottom > 100) {
+                        history.replaceState(null, null, window.location.pathname);
                     }
                 }
             }
-
-            // Bind to both the small link buttons in the intro (.links a) and the
-            // nav-links inside the intro profile area. Prevent default navigation
-            // so we can animate first.
-            const introButtons = document.querySelectorAll('.links a, .nav-links a');
-            introButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const href = btn.getAttribute('href');
-                    activateNavbarAndScroll(href && href.startsWith('#') ? href : null);
-                });
-            });
-
-            // Also allow the topbar links to jump to sections normally after revealed
-            topbar.querySelectorAll('a').forEach(a => {
-                a.addEventListener('click', (e) => {
-                    // If the topbar wasn't visible yet (e.g., user clicked quickly),
-                    // ensure the UI is activated first
-                    if (!topbar.classList.contains('visible')) {
-                        e.preventDefault();
-                        const href = a.getAttribute('href');
-                        activateNavbarAndScroll(href && href.startsWith('#') ? href : null);
-                    }
-                });
-            });
-
-            // Reveal topbar naturally when the user scrolls past the intro container
-            try {
-                // existing observer for the container keeps showing/hiding the topbar
-                const containerObserver = new IntersectionObserver((entries) => {
-                    if (suppressObservers) return;
-                    entries.forEach(entry => {
-                        if (!entry.isIntersecting) {
-                            topbar.classList.add('visible');
-                            body.classList.add('with-navbar');
-                        } else {
-                            if (!container.classList.contains('intro-hide')) {
-                                topbar.classList.remove('visible');
-                                body.classList.remove('with-navbar');
-                            }
-                        }
-                    });
-                }, { root: null, threshold: 0 });
-                containerObserver.observe(container);
-
-                // New observer: watch the profile-section and trigger the topbar and
-                // an immediate scroll to the `#work` section as soon as the profile
-                // section's bottom moves above the top of the viewport (i.e., scrolled past).
-                const profileSection = document.querySelector('.profile-section');
-                let profileTriggered = false;
-                if (profileSection) {
-                    const profileObserver = new IntersectionObserver((entries) => {
-                        if (suppressObservers) return;
-                        entries.forEach(entry => {
-                            // When intersectionRatio is 0 and the element's bottom is above
-                            // the viewport (boundingClientRect.bottom < 0) the user has scrolled
-                            // past the profile section upward — trigger reveal and scroll.
-                            if (entry.intersectionRatio === 0 && entry.boundingClientRect.bottom < 0) {
-                                if (!profileTriggered) {
-                                    profileTriggered = true;
-                                    topbar.classList.add('visible');
-                                    body.classList.add('with-navbar');
-
-                                    // Scroll to #work with offset to account for the topbar
-                                    const workEl = document.querySelector('#work');
-                                    if (workEl) {
-                                        // slight delay to ensure topbar class is applied
-                                        setTimeout(() => {
-                                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
-                                            const targetY = window.scrollY + workEl.getBoundingClientRect().top - (topOffset + 8);
-                                            window.scrollTo({ top: targetY, behavior: 'smooth' });
-                                        }, 80);
-                                    }
-                                }
-                            } else if (entry.isIntersecting) {
-                                // If user scrolls back up, reset trigger so it can fire again
-                                profileTriggered = false;
-                                if (!container.classList.contains('intro-hide')) {
-                                    topbar.classList.remove('visible');
-                                    body.classList.remove('with-navbar');
-                                }
-                            }
-                        });
-                    }, { root: null, threshold: 0 });
-                    profileObserver.observe(profileSection);
-                }
-            } catch (e) {
-                // Fallback: a scroll listener that triggers when profile-section bottom < 0
-                const profileSection = document.querySelector('.profile-section');
-                let profileTriggered = false;
-                window.addEventListener('scroll', () => {
-                    if (!profileSection) return;
-                    const rect = profileSection.getBoundingClientRect();
-                    if (rect.bottom < 0 && !profileTriggered) {
-                        profileTriggered = true;
-                        topbar.classList.add('visible');
-                        body.classList.add('with-navbar');
-                        const workEl = document.querySelector('#work');
-                        if (workEl) {
-                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
-                            const targetY = window.scrollY + workEl.getBoundingClientRect().top - (topOffset + 8);
-                            window.scrollTo({ top: targetY, behavior: 'smooth' });
-                        }
-                    } else if (rect.bottom >= 0) {
-                        profileTriggered = false;
-                        if (!container.classList.contains('intro-hide')) {
-                            topbar.classList.remove('visible');
-                            body.classList.remove('with-navbar');
-                        }
-                    }
-                });
-            }
-        })();
+        });
     </script>
 </body>
 </html>
