@@ -297,6 +297,8 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 260ms ease, transform 260ms cubic-bezier(.2,.9,.3,1);
+            /* Grey outline */
+            border: 1px solid #404040;
         }
 
         .topbar.visible {
@@ -315,6 +317,18 @@
         }
 
         .topbar a:hover { color: #6b9eff; transform: translateY(-2px); background: rgba(255,255,255,0.02); }
+        
+        /* Active section highlighting */
+        .topbar a.active {
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            border: 1px solid #606060;
+        }
+        
+        .topbar a.active:hover {
+            background: rgba(255,255,255,0.15);
+            color: #6b9eff;
+        }
 
         /* when navbar is shown we stop centering and add top padding so content isn't hidden */
         body.with-navbar {
@@ -686,6 +700,9 @@
                     }
                 });
                 
+                // Update topbar active states
+                this.updateTopbarActiveState(activeSection);
+                
                 if (activeSection) {
                     // Update URL hash immediately when section is active
                     const newHash = '#' + activeSection.id;
@@ -701,6 +718,27 @@
                                 history.replaceState(null, null, window.location.pathname);
                             }
                         }
+                    }
+                }
+            }
+            
+            updateTopbarActiveState(activeSection) {
+                // Remove active class from all topbar links
+                document.querySelectorAll('.topbar a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Add active class to the current section's link
+                if (activeSection) {
+                    const activeLink = document.querySelector(`.topbar a[href="#${activeSection.id}"]`);
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                    }
+                } else {
+                    // If no section is active (at home), highlight home link
+                    const homeLink = document.querySelector('.topbar a[href="#home"], .topbar a[href="#"]');
+                    if (homeLink) {
+                        homeLink.classList.add('active');
                     }
                 }
             }
@@ -724,6 +762,8 @@
                                 if (window.location.hash !== newHash) {
                                     history.replaceState(null, null, newHash);
                                 }
+                                // Update topbar active state
+                                this.updateTopbarActiveState(entry.target);
                             }
                         } else {
                             entry.target.classList.remove('in-view');
