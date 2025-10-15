@@ -293,7 +293,7 @@
 <body>
     <header class="topbar" aria-hidden="true">
         <nav class="topbar-links">
-            <a href="#home">home</a>
+            <a href="">home</a>
             <a href="#work">work</a>
             <a href="#projects">projects</a>
             <a href="#academics">academics</a>
@@ -354,9 +354,6 @@
     </div>
 
     <main id="main-content">
-        <section id="home" style="min-height:100vh; padding:40px 20px;">
-            <!-- Home content placeholder -->
-        </section>
 
         <section id="work" style="min-height:80vh; padding:40px 20px;">
             <h2 style="color:#fff; margin-bottom:12px;">Work</h2>
@@ -387,8 +384,13 @@
             const topbar = document.querySelector('.topbar');
             const container = document.querySelector('.container');
             const body = document.body;
+            let suppressObservers = false; // when true observers won't react (used during user-initiated animation)
 
             function activateNavbarAndScroll(targetHash) {
+                // Prevent observers from reacting while we animate programmatically
+                suppressObservers = true;
+                setTimeout(() => { suppressObservers = false; }, 1100);
+
                 // Reveal the topbar and adjust body layout
                 topbar.classList.add('visible');
                 body.classList.add('with-navbar');
@@ -400,16 +402,27 @@
                     container.style.display = 'none';
                 }, 300);
 
-                // Scroll down to the main content. We first scroll by viewport height
-                // so the navbar becomes the top of the page. If a hash target exists,
-                // scroll to that section shortly after.
-                window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-
+                // Scroll to the requested target (if any) with offset to account for the topbar.
+                // This replaces multiple staggered scrolls that caused bouncing.
                 if (targetHash) {
-                    setTimeout(() => {
-                        const el = document.querySelector(targetHash);
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 600);
+                    const el = document.querySelector(targetHash);
+                    if (el) {
+                        setTimeout(() => {
+                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
+                            const targetY = window.scrollY + el.getBoundingClientRect().top - (topOffset + 8);
+                            window.scrollTo({ top: targetY, behavior: 'smooth' });
+                        }, 120); // small delay so classes apply
+                    }
+                } else {
+                    // default: scroll to main content area
+                    const main = document.querySelector('#main-content');
+                    if (main) {
+                        setTimeout(() => {
+                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
+                            const targetY = window.scrollY + main.getBoundingClientRect().top - (topOffset + 8);
+                            window.scrollTo({ top: targetY, behavior: 'smooth' });
+                        }, 120);
+                    }
                 }
             }
 
@@ -440,32 +453,87 @@
 
             // Reveal topbar naturally when the user scrolls past the intro container
             try {
-                const observer = new IntersectionObserver((entries) => {
+                // existing observer for the container keeps showing/hiding the topbar
+                const containerObserver = new IntersectionObserver((entries) => {
+                    if (suppressObservers) return;
                     entries.forEach(entry => {
                         if (!entry.isIntersecting) {
                             topbar.classList.add('visible');
                             body.classList.add('with-navbar');
                         } else {
-                            // only hide if the container hasn't been explicitly hidden
                             if (!container.classList.contains('intro-hide')) {
                                 topbar.classList.remove('visible');
                                 body.classList.remove('with-navbar');
                             }
                         }
                     });
-                }, { root: null, threshold: 0, rootMargin: '-10px 0px -90% 0px' });
+                }, { root: null, threshold: 0 });
+                containerObserver.observe(container);
 
-                observer.observe(container);
+                // New observer: watch the profile-section and trigger the topbar and
+                // an immediate scroll to the `#work` section as soon as the profile
+                // section's bottom moves above the top of the viewport (i.e., scrolled past).
+                const profileSection = document.querySelector('.profile-section');
+                let profileTriggered = false;
+                if (profileSection) {
+                    const profileObserver = new IntersectionObserver((entries) => {
+                        if (suppressObservers) return;
+                        entries.forEach(entry => {
+                            // When intersectionRatio is 0 and the element's bottom is above
+                            // the viewport (boundingClientRect.bottom < 0) the user has scrolled
+                            // past the profile section upward — trigger reveal and scroll.
+                            if (entry.intersectionRatio === 0 && entry.boundingClientRect.bottom < 0) {
+                                if (!profileTriggered) {
+                                    profileTriggered = true;
+                                    topbar.classList.add('visible');
+                                    body.classList.add('with-navbar');
+
+                                    // Scroll to #work with offset to account for the topbar
+                                    const workEl = document.querySelector('#work');
+                                    if (workEl) {
+                                        // slight delay to ensure topbar class is applied
+                                        setTimeout(() => {
+                                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
+                                            const targetY = window.scrollY + workEl.getBoundingClientRect().top - (topOffset + 8);
+                                            window.scrollTo({ top: targetY, behavior: 'smooth' });
+                                        }, 80);
+                                    }
+                                }
+                            } else if (entry.isIntersecting) {
+                                // If user scrolls back up, reset trigger so it can fire again
+                                profileTriggered = false;
+                                if (!container.classList.contains('intro-hide')) {
+                                    topbar.classList.remove('visible');
+                                    body.classList.remove('with-navbar');
+                                }
+                            }
+                        });
+                    }, { root: null, threshold: 0 });
+                    profileObserver.observe(profileSection);
+                }
             } catch (e) {
-                // IntersectionObserver might not be supported on very old browsers - fall back to scroll listener
+                // Fallback: a scroll listener that triggers when profile-section bottom < 0
+                const profileSection = document.querySelector('.profile-section');
+                let profileTriggered = false;
                 window.addEventListener('scroll', () => {
-                    const rect = container.getBoundingClientRect();
-                    if (rect.bottom <= 0) {
+                    if (!profileSection) return;
+                    const rect = profileSection.getBoundingClientRect();
+                    if (rect.bottom < 0 && !profileTriggered) {
+                        profileTriggered = true;
                         topbar.classList.add('visible');
                         body.classList.add('with-navbar');
-                    } else if (!container.classList.contains('intro-hide')) {
-                        topbar.classList.remove('visible');
-                        body.classList.remove('with-navbar');
+                        const workEl = document.querySelector('#work');
+                        if (workEl) {
+                            const topOffset = document.querySelector('.topbar')?.offsetHeight || 84;
+                            const targetY = window.scrollY + workEl.getBoundingClientRect().top - (topOffset + 8);
+                            window.scrollTo({ top: targetY, behavior: 'smooth' });
+                        }
+                    } else if (rect.bottom >= 0) {
+                        profileTriggered = false;
+                        if (!container.classList.contains('intro-hide')) {
+                            topbar.classList.remove('visible');
+                            body.classList.remove('with-navbar');
+                        }
                     }
                 });
             }
