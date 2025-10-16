@@ -11,37 +11,20 @@
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-            scroll-snap-type: y mandatory;
-            /* Performance optimizations */
-            scroll-padding-top: 50px;
-            scroll-padding-bottom: 0;
-            /* Better scroll performance */
-            -webkit-overflow-scrolling: touch;
-            /* Respect user's motion preferences */
+        html, body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
         
-        /* Fix scroll snap offset issues */
-        body {
-            /* Ensure consistent scroll behavior */
-            overflow-x: hidden;
-        }
-        
-        /* Ensure all scroll-snap elements have consistent positioning */
+        /* Ensure all elements have consistent positioning */
         .container, section {
             position: relative;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
         }
         
         
         /* Respect reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
-            html {
-                scroll-behavior: auto;
-            }
-            
             * {
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
@@ -54,7 +37,7 @@
             background-color: #0a0a0a;
             color: #e0e0e0;
             line-height: 1.6;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center; /* keeps intro vertically centered before activation */
@@ -74,14 +57,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            scroll-snap-align: start;
         }
 
         /* Center the intro `.container` vertically and horizontally */
         .container {
             max-width: 800px;
             width: 100%;
-            min-height: 100vh; /* full viewport height so it can be centered */
+            height: 100vh; /* full viewport height so it can be centered */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -95,7 +77,7 @@
 
         /* When the navbar is visible, reduce the available height so container remains centered beneath the bar */
         body.with-navbar .container {
-            min-height: calc(100vh - 84px);
+            height: calc(100vh - 84px);
         }
 
         .profile-section {
@@ -280,190 +262,9 @@
                 font-size: 1.6rem;
             }
         }
-        /* top-centered fixed navbar (hidden until after click) */
-        .topbar {
-            position: fixed;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-8px);
-            background: rgba(10,10,10,0.9);
-            padding: 8px 14px;
-            border-radius: 10px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            z-index: 60;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.6);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 260ms ease, transform 260ms cubic-bezier(.2,.9,.3,1);
-            /* Grey outline */
-            border: 1px solid #404040;
-        }
-
-        .topbar.visible {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .topbar a {
-            color: #e0e0e0;
-            text-decoration: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            text-transform: lowercase;
-            transition: background-color 0.15s, color 0.15s, transform 0.12s;
-        }
-
-        .topbar a:hover { color: #6b9eff; transform: translateY(-2px); background: rgba(255,255,255,0.02); }
-        
-        /* Active section highlighting */
-        .topbar a.active {
-            background: rgba(255,255,255,0.1);
-            color: #ffffff;
-            border: 1px solid #606060;
-        }
-        
-        .topbar a.active:hover {
-            background: rgba(255,255,255,0.15);
-            color: #6b9eff;
-        }
-
-        /* when navbar is shown we stop centering and add top padding so content isn't hidden */
-        body.with-navbar {
-            /* when navbar is visible, top-align the page and keep content centered */
-            justify-content: flex-start;
-            align-items: center;
-            padding-top: 84px; /* enough space for the topbar */
-        }
-
-        /* hide the intro container with a smooth fade/slide */
-        .container.intro-hide {
-            opacity: 0;
-            transform: translateY(-20px);
-            pointer-events: none;
-            transition: opacity 260ms ease, transform 260ms ease;
-        }
-
-        /* Section styling with scroll snap and animations */
-        section {
-            min-height: 100vh;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            /* Performance optimizations */
-            will-change: transform, opacity;
-            /* Initial state for animations */
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-            /* Fix offset issues */
-            margin: 0;
-            border: none;
-            outline: none;
-        }
-        
-        /* Animate sections when they come into view */
-        section.in-view {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Stagger animations for better visual flow */
-        section:nth-child(1).in-view { transition-delay: 0.1s; }
-        section:nth-child(2).in-view { transition-delay: 0.2s; }
-        section:nth-child(3).in-view { transition-delay: 0.3s; }
-        section:nth-child(4).in-view { transition-delay: 0.4s; }
-
-        section h2 {
-            color: #fff;
-            margin-bottom: 12px;
-            /* Subtle animation for headings */
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s;
-        }
-        
-        section.in-view h2 {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        section p {
-            color: #c0c0c0;
-            max-width: 800px;
-            /* Subtle animation for paragraphs */
-            opacity: 0;
-            transform: translateY(15px);
-            transition: opacity 0.5s ease-out 0.4s, transform 0.5s ease-out 0.4s;
-        }
-        
-        section.in-view p {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Ensure last section has enough space to snap properly */
-        section:last-child {
-            margin-bottom: 100vh;
-            scroll-snap-align: start;
-            scroll-snap-stop: always;
-        }
-        
-        /* Scroll indicator for better UX */
-        .scroll-indicator {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 50;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .scroll-indicator.visible {
-            opacity: 1;
-        }
-        
-        .scroll-indicator::before {
-            content: '';
-            display: block;
-            width: 2px;
-            height: 40px;
-            background: linear-gradient(to bottom, #6b9eff, transparent);
-            border-radius: 1px;
-        }
-        
-        /* Hide scroll indicator on mobile */
-        @media (max-width: 768px) {
-            .scroll-indicator {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body>
-    <header class="topbar" aria-hidden="true">
-        <nav class="topbar-links">
-            <a href="#home">home</a>
-            <a href="#work">work</a>
-            <a href="#projects">projects</a>
-            <a href="#academics">academics</a>
-            <a href="#writings">writings</a>
-        </nav>
-        <div class="topbar-social" aria-hidden="true">
-            <a href="https://github.com/angadjosan" target="_blank" title="GitHub">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            </a>
-            <a href="https://www.linkedin.com/in/angad-singh-josan/" target="_blank" title="LinkedIn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            </a>
-            <a href="mailto:angadjosan@outlook.com" title="Email">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 6.817h-18.779l5.513-6.812zm9.208-1.264l4.616-3.741v9.348l-4.616-5.607z"/></svg>
-            </a>
-        </div>
-    </header>
     <div class="container" id="home">
                 <div class="profile-section">
                                         <img src="images/headshot-4x.jpg"
@@ -478,10 +279,10 @@
                 
                 <div class="links">
                     <nav class="nav-links">
-                        <a href="#work">work</a>
-                        <a href="#projects">projects</a>
-                        <a href="#academics">academics</a>
-                        <a href="#writings">writings</a>
+                        <a href="work">work</a>
+                        <a href="projects">projects</a>
+                        <a href="academics">academics</a>
+                        <a href="writings">writings</a>
                     </nav>
 
                     <div class="social-links">
@@ -505,380 +306,5 @@
             </div>
         </div>
     </div>
-
-    <main id="main-content">
-
-        <section id="work">
-            <h2>Work</h2>
-            <p>Placeholder for work content.</p>
-        </section>
-
-        <section id="projects">
-            <h2>Projects</h2>
-            <p>Placeholder for projects content.</p>
-        </section>
-
-        <section id="academics">
-            <h2>Academics</h2>
-            <p>Placeholder for academics content.</p>
-        </section>
-
-        <section id="writings">
-            <h2>Writings</h2>
-            <p>Placeholder for writing content.</p>
-        </section>
-    </main>
-    
-    <!-- Scroll indicator for better UX -->
-    <div class="scroll-indicator" aria-hidden="true"></div>
-
-    <script>
-        // Modern scroll optimization with performance best practices
-        class ScrollManager {
-            constructor() {
-                this.topbar = document.querySelector('.topbar');
-                this.container = document.querySelector('.container');
-                this.sections = document.querySelectorAll('section[id]');
-                this.scrollIndicator = document.querySelector('.scroll-indicator');
-                this.isScrolling = false;
-                this.scrollTimeout = null;
-                this.lastScrollY = 0;
-                this.scrollDirection = 'down';
-                
-                // Check for reduced motion preference
-                this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                
-                this.init();
-            }
-            
-            init() {
-                this.setupNavigation();
-                this.setupScrollOptimization();
-                this.setupIntersectionObserver();
-                this.setupKeyboardNavigation();
-                this.handleInitialHash();
-            }
-            
-            setupNavigation() {
-                // Handle navigation clicks for both nav-links and topbar-links
-                document.querySelectorAll('.nav-links a, .topbar-links a').forEach(a => {
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.handleNavigation(a.getAttribute('href'));
-                    });
-                });
-            }
-            
-            handleNavigation(href) {
-                // Handle home link
-                if (href === '' || href === '#' || href === '#home') {
-                    this.navigateToHome();
-                } else if (href && href.startsWith('#')) {
-                    this.navigateToSection(href);
-                }
-            }
-            
-            navigateToHome() {
-                document.body.classList.remove('with-navbar');
-                history.replaceState(null, null, window.location.pathname);
-                const homeContainer = document.querySelector('#home');
-                if (homeContainer) {
-                    this.smoothScrollTo(homeContainer);
-                } else {
-                    this.smoothScrollToTop();
-                }
-            }
-            
-            navigateToSection(href) {
-                document.body.classList.add('with-navbar');
-                const target = document.querySelector(href);
-                if (target) {
-                    this.smoothScrollTo(target);
-                }
-            }
-            
-            smoothScrollTo(element) {
-                if (this.prefersReducedMotion) {
-                    element.scrollIntoView({ behavior: 'auto', block: 'start' });
-                } else {
-                    // Use more precise scroll positioning to avoid offset issues
-                    const elementRect = element.getBoundingClientRect();
-                    const absoluteElementTop = elementRect.top + window.pageYOffset;
-                    // Account for topbar height (84px) plus some breathing room
-                    const topbarOffset = 50;
-                    window.scrollTo({
-                        top: Math.max(0, absoluteElementTop - topbarOffset),
-                        behavior: 'smooth'
-                    });
-                }
-            }
-            
-            smoothScrollToTop() {
-                if (this.prefersReducedMotion) {
-                    window.scrollTo({ top: 0, behavior: 'auto' });
-                } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            }
-            
-            setupScrollOptimization() {
-                // Throttled scroll handler using requestAnimationFrame for better performance
-                let ticking = false;
-                
-                const handleScroll = () => {
-                    if (!ticking) {
-                        requestAnimationFrame(() => {
-                            this.updateScrollState();
-                            ticking = false;
-                        });
-                        ticking = true;
-                    }
-                };
-                
-                window.addEventListener('scroll', handleScroll, { passive: true });
-                
-                // Additional handler for scroll-snap completion
-                let scrollTimeout;
-                const handleScrollEnd = () => {
-                    clearTimeout(scrollTimeout);
-                    scrollTimeout = setTimeout(() => {
-                        this.updateActiveSection();
-                    }, 100);
-                };
-                
-                window.addEventListener('scroll', handleScrollEnd, { passive: true });
-            }
-            
-            updateScrollState() {
-                const currentScrollY = window.scrollY;
-                this.scrollDirection = currentScrollY > this.lastScrollY ? 'down' : 'up';
-                this.lastScrollY = currentScrollY;
-                
-                // Update navbar visibility
-                if (currentScrollY > 400) {
-                    this.topbar.classList.add('visible');
-                    document.body.classList.add('with-navbar');
-                } else {
-                    this.topbar.classList.remove('visible');
-                    document.body.classList.remove('with-navbar');
-                    if (currentScrollY < 100) {
-                        history.replaceState(null, null, window.location.pathname);
-                    }
-                }
-                
-                // Update scroll indicator
-                this.updateScrollIndicator(currentScrollY);
-                
-                // Update URL hash based on current section
-                this.updateActiveSection();
-            }
-            
-            updateScrollIndicator(scrollY) {
-                if (this.scrollIndicator) {
-                    const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-                    const scrollProgress = Math.min(scrollY / documentHeight, 1);
-                    
-                    // Show indicator when scrolled past intro
-                    if (scrollY > 200) {
-                        this.scrollIndicator.classList.add('visible');
-                    } else {
-                        this.scrollIndicator.classList.remove('visible');
-                    }
-                }
-            }
-            
-            updateActiveSection() {
-                let activeSection = null;
-                const scrollY = window.scrollY;
-                // Account for topbar offset in section detection
-                const topbarOffset = 50;
-                
-                this.sections.forEach(section => {
-                    const rect = section.getBoundingClientRect();
-                    if (rect.top <= topbarOffset && rect.bottom > topbarOffset) {
-                        activeSection = section;
-                    }
-                });
-                
-                // Update topbar active states
-                this.updateTopbarActiveState(activeSection);
-                
-                if (activeSection) {
-                    // Update URL hash immediately when section is active
-                    const newHash = '#' + activeSection.id;
-                    if (window.location.hash !== newHash) {
-                        history.replaceState(null, null, newHash);
-                    }
-                } else if (scrollY > topbarOffset) {
-                    const homeContainer = document.querySelector('#home');
-                    if (homeContainer) {
-                        const homeRect = homeContainer.getBoundingClientRect();
-                        if (homeRect.top <= topbarOffset && homeRect.bottom > topbarOffset) {
-                            if (window.location.hash !== '') {
-                                history.replaceState(null, null, window.location.pathname);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            updateTopbarActiveState(activeSection) {
-                // Remove active class from all topbar links
-                document.querySelectorAll('.topbar a').forEach(link => {
-                    link.classList.remove('active');
-                });
-                
-                // Add active class to the current section's link
-                if (activeSection) {
-                    const activeLink = document.querySelector(`.topbar a[href="#${activeSection.id}"]`);
-                    if (activeLink) {
-                        activeLink.classList.add('active');
-                    }
-                } else {
-                    // If no section is active (at home), highlight home link
-                    const homeLink = document.querySelector('.topbar a[href="#home"], .topbar a[href="#"]');
-                    if (homeLink) {
-                        homeLink.classList.add('active');
-                    }
-                }
-            }
-            
-            setupIntersectionObserver() {
-                // Use IntersectionObserver for better performance
-                const observerOptions = {
-                    root: null,
-                    // Account for topbar offset in intersection detection
-                    rootMargin: '-50px 0px -20% 0px',
-                    threshold: 0.1
-                };
-                
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('in-view');
-                            // Update URL hash when section comes into view
-                            if (entry.target.id) {
-                                const newHash = '#' + entry.target.id;
-                                if (window.location.hash !== newHash) {
-                                    history.replaceState(null, null, newHash);
-                                }
-                                // Update topbar active state
-                                this.updateTopbarActiveState(entry.target);
-                            }
-                        } else {
-                            entry.target.classList.remove('in-view');
-                        }
-                    });
-                }, observerOptions);
-                
-                // Observe all sections for scroll-triggered animations
-                this.sections.forEach(section => {
-                    observer.observe(section);
-                });
-            }
-            
-            setupKeyboardNavigation() {
-                // Add keyboard navigation support
-                document.addEventListener('keydown', (e) => {
-                    // Only handle if no input/textarea is focused
-                    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
-                        return;
-                    }
-                    
-                    switch(e.key) {
-                        case 'ArrowDown':
-                        case 'PageDown':
-                        case ' ': // Spacebar
-                            e.preventDefault();
-                            this.scrollToNextSection();
-                            break;
-                        case 'ArrowUp':
-                        case 'PageUp':
-                            e.preventDefault();
-                            this.scrollToPreviousSection();
-                            break;
-                        case 'Home':
-                            e.preventDefault();
-                            this.navigateToHome();
-                            break;
-                        case 'End':
-                            e.preventDefault();
-                            this.scrollToLastSection();
-                            break;
-                    }
-                });
-            }
-            
-            scrollToNextSection() {
-                const currentSection = this.getCurrentSection();
-                if (currentSection) {
-                    const nextSection = currentSection.nextElementSibling;
-                    if (nextSection && nextSection.tagName === 'SECTION') {
-                        this.smoothScrollTo(nextSection);
-                    }
-                } else {
-                    // If not in a section, go to first section
-                    const firstSection = document.querySelector('section');
-                    if (firstSection) {
-                        this.smoothScrollTo(firstSection);
-                    }
-                }
-            }
-            
-            scrollToPreviousSection() {
-                const currentSection = this.getCurrentSection();
-                if (currentSection) {
-                    const prevSection = currentSection.previousElementSibling;
-                    if (prevSection && prevSection.tagName === 'SECTION') {
-                        this.smoothScrollTo(prevSection);
-                    } else {
-                        // Go to home if at first section
-                        this.navigateToHome();
-                    }
-                }
-            }
-            
-            scrollToLastSection() {
-                const lastSection = document.querySelector('section:last-of-type');
-                if (lastSection) {
-                    this.smoothScrollTo(lastSection);
-                }
-            }
-            
-            getCurrentSection() {
-                const topbarOffset = 50;
-                for (let section of this.sections) {
-                    const rect = section.getBoundingClientRect();
-                    if (rect.top <= topbarOffset && rect.bottom > topbarOffset) {
-                        return section;
-                    }
-                }
-                return null;
-            }
-            
-            handleInitialHash() {
-                if (window.location.hash) {
-                    const target = document.querySelector(window.location.hash);
-                    if (target) {
-                        this.topbar.classList.add('visible');
-                        document.body.classList.add('with-navbar');
-                        setTimeout(() => {
-                            this.smoothScrollTo(target);
-                        }, 50);
-                    }
-                }
-            }
-        }
-        
-        // Initialize scroll manager when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            new ScrollManager();
-        });
-        
-        // Fallback for older browsers
-        if (!window.IntersectionObserver) {
-            console.warn('IntersectionObserver not supported, using fallback scroll handling');
-        }
-    </script>
 </body>
 </html>
