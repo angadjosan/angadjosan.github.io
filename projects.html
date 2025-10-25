@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projects — Angad Singh Josan</title>
+  <meta name="description" content="Selected projects by Angad Singh Josan" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #111214;
+      --text: #e0e0e0;
+      --muted: #a0a0a0;
+      --border: #2a2a2a;
+      --accent: #6b9eff;
+      --chip: #192033;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Top nav */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: saturate(140%) blur(8px);
+      background: rgba(10, 10, 10, 0.7);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand { font-weight: 700; color: #fff; letter-spacing: 0.2px; }
+    .nav { display: flex; gap: 6px; align-items: center; }
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 6px;
+      transition: .15s ease;
+    }
+    .nav a[aria-current="page"], .nav a:hover { color: var(--accent); background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+
+    /* Page */
+    .page {
+      max-width: 1000px;
+      margin: 24px auto 80px;
+      padding: 0 16px;
+    }
+    header.page-header { margin: 16px 0 22px; }
+    header.page-header h1 { margin: 0 0 4px; font-size: 2.2rem; color: #fff; }
+    header.page-header p { margin: 0; color: var(--muted); }
+
+    /* List */
+    .list { display: grid; gap: 14px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    .card .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 8px; }
+    .card p { margin: 8px 0 0; color: #cfcfcf; }
+    .bullets { margin-top: 8px; padding-left: 18px; }
+    .bullets li { margin: 4px 0; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+      font-size: 12px; color: var(--accent); background: var(--chip);
+      border: 1px solid #23314f; padding: 4px 8px; border-radius: 999px;
+    }
+    .links { display: flex; gap: 10px; margin-top: 10px; }
+    .links a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+    .links a:hover { color: var(--accent); }
+
+    .empty { color: var(--muted); border: 1px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+
+    /* Back to top */
+    .to-top { position: fixed; right: 16px; bottom: 16px; background: #15161a; color: #fff; border: 1px solid var(--border); padding: 10px 12px; border-radius: 999px; text-decoration: none; opacity: .8; }
+    .to-top:hover { opacity: 1; color: var(--accent); }
+
+    @media (max-width: 768px) {
+      header.page-header h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="nav">
+        <a class="brand" href="index.html">Angad Singh Josan</a>
+        <a href="work.html">work</a>
+        <a href="projects.html" aria-current="page">projects</a>
+        <a href="AngadSinghJosan_Resume.pdf">resume</a>
+      </div>
+      <div class="nav">
+        <a href="https://github.com/angadjosan" target="_blank" title="GitHub">GitHub</a>
+        <a href="https://www.linkedin.com/in/angad-singh-josan/" target="_blank" title="LinkedIn">LinkedIn</a>
+        <a href="mailto:angadjosan@outlook.com" title="Email">Email</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="page" id="top">
+    <header class="page-header">
+      <h1>Projects</h1>
+      <p>Selected things I built or shipped. Quick to scan. Links when available.</p>
+    </header>
+
+    <section id="list" class="list"></section>
+
+    <div id="empty" class="empty" style="display:none;">No projects yet. Add some entries in the data section in this file.</div>
+  </main>
+
+  <a href="#top" class="to-top" aria-label="Back to top">Top</a>
+
+  <script>
+    // Data model:
+    // {
+    //   title: "",
+    //   org: "",             // optional
+    //   date: "",            // e.g., "2025", "Jan 2025", "2024–2025"
+    //   blurb: "",           // optional short summary
+    //   bullets: [""],       // optional
+    //   tags: ["AI","Web"], // optional
+    //   links: [{label: "GitHub", href: ""}] // optional
+    // }
+
+    const PROJECTS = [
+      // Example:
+      // {
+      //   title: "MyCoolApp",
+      //   org: "Personal",
+      //   date: "2025",
+      //   blurb: "Tiny app that does X using Y.",
+      //   bullets: [
+      //     "Built with Next.js + Vercel; 10k+ pageviews",
+      //     "Fine-tuned small LLM for feature Z"
+      //   ],
+      //   tags: ["TypeScript", "LLM", "Next.js"],
+      //   links: [
+      //     { label: "GitHub", href: "https://github.com/angadjosan/mycoolapp" },
+      //     { label: "Live", href: "https://mycoolapp.vercel.app" }
+      //   ]
+      // }
+    ];
+
+    function renderList(items) {
+      const list = document.getElementById('list');
+      const empty = document.getElementById('empty');
+      list.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      items.forEach(item => {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        const title = document.createElement('h3');
+        title.textContent = item.title || 'Untitled';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const bits = [];
+        if (item.org) bits.push(item.org);
+        if (item.date) bits.push(item.date);
+        meta.textContent = bits.join(' • ');
+
+        card.appendChild(title);
+        if (bits.length) card.appendChild(meta);
+
+        if (item.blurb) {
+          const p = document.createElement('p');
+          p.textContent = item.blurb;
+          card.appendChild(p);
+        }
+
+        if (Array.isArray(item.bullets) && item.bullets.length) {
+          const ul = document.createElement('ul');
+          ul.className = 'bullets';
+          item.bullets.forEach(b => {
+            const li = document.createElement('li');
+            li.textContent = b;
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+        }
+
+        if (Array.isArray(item.tags) && item.tags.length) {
+          const chips = document.createElement('div');
+          chips.className = 'chips';
+          item.tags.forEach(t => {
+            const span = document.createElement('span');
+            span.className = 'chip';
+            span.textContent = t;
+            chips.appendChild(span);
+          });
+          card.appendChild(chips);
+        }
+
+        if (Array.isArray(item.links) && item.links.length) {
+          const links = document.createElement('div');
+          links.className = 'links';
+          item.links.forEach(l => {
+            const a = document.createElement('a');
+            a.href = l.href;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = l.label || 'Link';
+            links.appendChild(a);
+          });
+          card.appendChild(links);
+        }
+
+        list.appendChild(card);
+      });
+    }
+
+    renderList(PROJECTS);
+  </script>
+</body>
+</html>
