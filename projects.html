@@ -72,9 +72,75 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
+      display: flex;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .card h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
-    .card .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 8px; }
+    .card:hover {
+      border-color: rgba(107, 158, 255, 0.3);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+    }
+    .card-logo {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-content { flex: 1; min-width: 0; }
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .card h3 { 
+      margin: 0; 
+      font-size: 1.15rem; 
+      color: #fff;
+      flex: 1;
+    }
+    .card h3 a {
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .card h3 a:hover {
+      color: var(--accent);
+    }
+    .card .date { 
+      color: var(--muted); 
+      font-size: 0.95rem; 
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .card .headline {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 8px;
+    }
+    .links { display: flex; gap: 10px; margin: 0 0 10px; }
+    .links a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+    .links a:hover { color: var(--accent); }
+    .card-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .card.expanded .card-details {
+      max-height: 1000px;
+    }
     .card p { margin: 8px 0 0; color: #cfcfcf; }
     .bullets { margin-top: 8px; padding-left: 18px; }
     .bullets li { margin: 4px 0; }
@@ -83,9 +149,6 @@
       font-size: 12px; color: var(--accent); background: var(--chip);
       border: 1px solid #23314f; padding: 4px 8px; border-radius: 999px;
     }
-    .links { display: flex; gap: 10px; margin-top: 10px; }
-    .links a { color: #fff; text-decoration: none; font-size: 0.95rem; }
-    .links a:hover { color: var(--accent); }
 
     .empty { color: var(--muted); border: 1px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; }
 
@@ -118,7 +181,6 @@
   <main class="page" id="top">
     <header class="page-header">
       <h1>Projects</h1>
-      <p>Selected things I built or shipped. Quick to scan. Links when available.</p>
     </header>
 
     <section id="list" class="list"></section>
@@ -129,34 +191,24 @@
   <a href="#top" class="to-top" aria-label="Back to top">Top</a>
 
   <script>
-    // Data model:
-    // {
-    //   title: "",
-    //   org: "",             // optional
-    //   date: "",            // e.g., "2025", "Jan 2025", "2024–2025"
-    //   blurb: "",           // optional short summary
-    //   bullets: [""],       // optional
-    //   tags: ["AI","Web"], // optional
-    //   links: [{label: "GitHub", href: ""}] // optional
-    // }
-
     const PROJECTS = [
-      // Example:
-      // {
-      //   title: "MyCoolApp",
-      //   org: "Personal",
-      //   date: "2025",
-      //   blurb: "Tiny app that does X using Y.",
-      //   bullets: [
-      //     "Built with Next.js + Vercel; 10k+ pageviews",
-      //     "Fine-tuned small LLM for feature Z"
-      //   ],
-      //   tags: ["TypeScript", "LLM", "Next.js"],
-      //   links: [
-      //     { label: "GitHub", href: "https://github.com/angadjosan/mycoolapp" },
-      //     { label: "Live", href: "https://mycoolapp.vercel.app" }
-      //   ]
-      // }
+      {
+        title: "ClaimD",
+        date: "October 2025",
+        url: "https://www.youtube.com/watch?v=IsTzIoonKjk",
+        logo: "images/claimd-logo.png",
+        headline: "AI Copilot for Social Security Disability Insurance (SSDI) Applications",
+        blurb: "Claimd uses AI to reduce Social Security Disability Insurance (SSDI) application review from 7 months to 2 weeks, helping 940,000 waiting Americans get social security benefits 10x faster. 940,000 Americans wait 7 months for Social Security Disability decisions while unable to work and pay rent. The SSA operates at a 25-year staffing low, with officers manually reviewing 34+ document fields per case. We built Claimd to turn months of waiting into days.",
+        bullets: [
+          "2nd Place at CalHacks: Promise (YC S18) track",
+          "Technical stuff"
+        ],
+        tags: ["TypeScript", "LLM", "Next.js"],
+        links: [
+          { label: "GitHub", href: "https://github.com/angadjosan/Claimd" },
+          { label: "DevPost", href: "https://devpost.com/software/idk-2fhbxa" }
+        ]
+      }
     ];
 
     function renderList(items) {
@@ -174,48 +226,58 @@
         const card = document.createElement('article');
         card.className = 'card';
 
+        // Logo
+        if (item.logo) {
+          const logoDiv = document.createElement('div');
+          logoDiv.className = 'card-logo';
+          const img = document.createElement('img');
+          img.src = item.logo;
+          img.alt = `${item.title || 'Project'} logo`;
+          logoDiv.appendChild(img);
+          card.appendChild(logoDiv);
+        }
+
+        // Content container
+        const content = document.createElement('div');
+        content.className = 'card-content';
+
+        // Header: Title and Date
+        const header = document.createElement('div');
+        header.className = 'card-header';
+
         const title = document.createElement('h3');
-        title.textContent = item.title || 'Untitled';
+        if (item.url) {
+          const a = document.createElement('a');
+          a.href = item.url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = item.title || 'Untitled';
+          // Prevent card expansion when clicking the link
+          a.addEventListener('click', (e) => e.stopPropagation());
+          title.appendChild(a);
+        } else {
+          title.textContent = item.title || 'Untitled';
+        }
+        header.appendChild(title);
 
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        const bits = [];
-        if (item.org) bits.push(item.org);
-        if (item.date) bits.push(item.date);
-        meta.textContent = bits.join(' • ');
-
-        card.appendChild(title);
-        if (bits.length) card.appendChild(meta);
-
-        if (item.blurb) {
-          const p = document.createElement('p');
-          p.textContent = item.blurb;
-          card.appendChild(p);
+        if (item.date) {
+          const date = document.createElement('span');
+          date.className = 'date';
+          date.textContent = item.date;
+          header.appendChild(date);
         }
 
-        if (Array.isArray(item.bullets) && item.bullets.length) {
-          const ul = document.createElement('ul');
-          ul.className = 'bullets';
-          item.bullets.forEach(b => {
-            const li = document.createElement('li');
-            li.textContent = b;
-            ul.appendChild(li);
-          });
-          card.appendChild(ul);
+        content.appendChild(header);
+
+        // Headline
+        if (item.headline) {
+          const headline = document.createElement('div');
+          headline.className = 'headline';
+          headline.textContent = item.headline;
+          content.appendChild(headline);
         }
 
-        if (Array.isArray(item.tags) && item.tags.length) {
-          const chips = document.createElement('div');
-          chips.className = 'chips';
-          item.tags.forEach(t => {
-            const span = document.createElement('span');
-            span.className = 'chip';
-            span.textContent = t;
-            chips.appendChild(span);
-          });
-          card.appendChild(chips);
-        }
-
+        // Links (moved to top, below headline)
         if (Array.isArray(item.links) && item.links.length) {
           const links = document.createElement('div');
           links.className = 'links';
@@ -225,10 +287,56 @@
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
             a.textContent = l.label || 'Link';
+            // Prevent card expansion when clicking links
+            a.addEventListener('click', (e) => e.stopPropagation());
             links.appendChild(a);
           });
-          card.appendChild(links);
+          content.appendChild(links);
         }
+
+        // Collapsible details container
+        const details = document.createElement('div');
+        details.className = 'card-details';
+
+        // Blurb
+        if (item.blurb) {
+          const p = document.createElement('p');
+          p.textContent = item.blurb;
+          details.appendChild(p);
+        }
+
+        // Bullets
+        if (Array.isArray(item.bullets) && item.bullets.length) {
+          const ul = document.createElement('ul');
+          ul.className = 'bullets';
+          item.bullets.forEach(b => {
+            const li = document.createElement('li');
+            li.textContent = b;
+            ul.appendChild(li);
+          });
+          details.appendChild(ul);
+        }
+
+        // Tags
+        if (Array.isArray(item.tags) && item.tags.length) {
+          const chips = document.createElement('div');
+          chips.className = 'chips';
+          item.tags.forEach(t => {
+            const span = document.createElement('span');
+            span.className = 'chip';
+            span.textContent = t;
+            chips.appendChild(span);
+          });
+          details.appendChild(chips);
+        }
+
+        content.appendChild(details);
+        card.appendChild(content);
+
+        // Add click handler to toggle expansion
+        card.addEventListener('click', () => {
+          card.classList.toggle('expanded');
+        });
 
         list.appendChild(card);
       });
