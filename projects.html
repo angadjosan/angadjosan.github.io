@@ -238,10 +238,6 @@
       youtube: '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/></svg>',
       link: '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/><path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4.02 4.02 0 0 1-.82 1H12a3 3 0 1 0 0-6H9z"/></svg>'
     };
-    // TODO: fix logos
-    // TODO: Make projects more technical (like Pranav's) - make companies impressed
-    // finish out last 3 projects
-    // then do work.html
     const PROJECTS = [
       {
         title: "ClaimD",
@@ -249,11 +245,11 @@
         url: "https://www.youtube.com/watch?v=IsTzIoonKjk",
         logo: "images/claimd-logo.png",
         headline: "AI Copilot for Social Security Disability Insurance Applications (940,000 annual applicants)",
-        blurb: "Claimd uses AI to reduce Social Security Disability Insurance (SSDI) application review from 7 months to 2 weeks, helping 940,000 waiting Americans get social security benefits 10x faster. 940,000 Americans wait 7 months for Social Security Disability decisions while unable to work and pay rent. The SSA operates at a 25-year staffing low, with officers manually reviewing 34+ document fields per case. We built Claimd to turn months of waiting into days.",
+        blurb: "Claimd uses AI to reduce Social Security Disability Insurance (SSDI) application review from 7 months to 2 weeks, helping 940,000 waiting Americans get social security benefits 10x faster. Disabled Americans who apply for Social Security Disability Insurance wait 7 months for decisions while unable to work and pay rent. The SSA operates at a 25-year staffing low, with officers manually reviewing 34+ document fields per case. We built Claimd to turn months of waiting into days. We utilized a FastAPI backend that interfaces with the Claude Sonnet 4.5 API, prompting it on the same 5-phase legal paradigm that SSA caseworkers use. For verification of the agents' steps, we use a Llama 4 Judge LLM, with inference on Groq Cloud, exposing the outputs of both the Claude agents' reasoning and the Groq agents' output on a Next.js frontend, retrieving from a MongoDB database.",
         bullets: [
           "2nd Place at CalHacks: Promise (YC S18) track"
         ],
-        tags: ["TypeScript", "Next.js", "React.js", "MongoDB", "FastAPI", "Claude", "Tailwind CSS"],
+        tags: ["TypeScript", "Next.js", "React.js", "MongoDB", "FastAPI", "Claude", "Llama", "Groq", "Tailwind CSS"],
         github: "https://github.com/angadjosan/Claimd",
         devpost: "https://devpost.com/software/idk-2fhbxa",
         youtube: "https://www.youtube.com/watch?v=IsTzIoonKjk"
@@ -276,7 +272,7 @@
         url: "https://decal.studentorg.berkeley.edu/",
         logo: "images/decal-logo.png",
         headline: "Student-run course coordination platform for UC Berkeley (8000+ users)",
-        blurb: "DeCal is a student-run course coordination platform for UC Berkeley with over 8000 users. It streamlines course management and scheduling for students and faculty.",
+        blurb: "DeCal is a student-run course coordination platform for UC Berkeley with over 8000 users. The platform streamlines management of DeCal courses (Berkeley-specific student-run courses) for students and student administrators. This enables administrators to easily upload their courses for approval, decreasing review time by 75% and allowing students to view available courses nearly 2 weeks earlier, further enabling students to apply to DeCal courses before the course add deadline. We utilize a Next.js frontend and an Express.js backend that interfaces with a Supabase PostgreSQL instance with role-based security (admin v.s. facilitator v.s. user).",
         tags: ["TypeScript", "Next.js", "React.js", "Supabase (PostgreSQL)", "Tailwind CSS", "OCF Servers"],
         website: "https://decal.studentorg.berkeley.edu/",
         github: "https://github.com/angadjosan/DeCal",
@@ -286,20 +282,34 @@
         date: "2021 - 2025",
         url: "https://epschedule.com/",
         logo: "images/epschedule-logo.png",
-        headline: "Schedule app for Eastside Preparatory School (500+ users)",
-        blurb: "A schedule management app serving 500 active users at my high school with 6 monthly sessions per user on average. The platform enables students to view their own schedules and connect with peers by accessing friends' schedules and photos. The app has become integral to campus culture, with 95% of students reporting they now know nearly everyone by both name and face.",
+        headline: "Schedule management platform for Eastside Preparatory School (500+ users)",
+        blurb: "A schedule management app serving 500 active users at my high school with 6 monthly sessions per user on average. The platform enables students to view their own schedules and connect with peers by accessing friends' schedules and photos. The app has become integral to campus culture, with 95% of students reporting they now know nearly everyone by both name and face. We utilize a Flask backend that serves dynamic HTML with Polymer styles, with authentication and data storage handled by Google Cloud Platform (GCP) Firebase. The deployment is also on GCP with continuous integration and testing utilizing pytest and individual unit testing.",
         tags: ["Flask", "Google Cloud Platform (GCP)", "Tailwind CSS", "Firebase"],
         website: "https://epschedule.com/",
         github: "https://github.com/EastsidePreparatorySchool/EPSchedule",
       },
       {
         title: "EPCarpool",
+        date: "2023 - 2025",
+        url: "https://epcarpool.com/",
+        logo: "images/epcarpool-logo.png",
+        headline: "Carpool coordination platform for Eastside Preparatory School",
+        blurb: "A carpool coordination platform for my high school, Eastside Preparatory School. The platform simplifies carpool arrangements among students and parents, enhancing community connectivity and reducing transportation challenges. We utilize an Express.js backend that serves carpool data for hosts and users, with authentication and data storage handled by Google Cloud Platform (GCP) Firebase and MongoDB, respectively. The deployment is also on GCP with continuous integration and deployment through GitHub Actions.",
+        tags: ["Express.js", "React.js", "Tailwind CSS", "Firebase", "MongoDB", ],
+        website: "https://epcarpool.com/",
+        github: "https://github.com/EastsidePreparatorySchool/EPCarpool",
       },
       {
         title: "Copal",
-      },
-      {
-        title: "CTorch",
+        date: "2024",
+        logo: "images/copal-logo.png",
+        headline: "Award-winning 3D action game reimagining Hunt the Wumpus with FPS combat",
+        blurb: "A 3D first-person action game that reimagines the classic Hunt the Wumpus adventure, winning 1st place at the Microsoft Hunt the Wumpus Hackathon. Players navigate procedurally generated dungeons filled with traps, enemies, and hazards while hunting the elusive Wumpus. The game features FPS combat mechanics, a grappling hook for traversal, and a unique trivia system that allows players to escape deadly pit traps by answering questions correctly. Built with Unity 2022.3.18f1 and C#, the game includes a Flask Python backend for leaderboard management and score tracking, with real-time data served through a local API that handles player statistics and game state persistence.",
+        tags: ["Unity3D", "Flask", "C#"],
+        bullets: [
+          "1st Place, Microsoft Hunt the Wumpus Hackathon"
+        ],
+        github: "https://github.com/angadjosan/Copal"
       }
     ];
 
@@ -410,13 +420,6 @@
         const details = document.createElement('div');
         details.className = 'card-details';
 
-        // Blurb
-        if (item.blurb) {
-          const p = document.createElement('p');
-          p.textContent = item.blurb;
-          details.appendChild(p);
-        }
-
         // Bullets
         if (Array.isArray(item.bullets) && item.bullets.length) {
           const ul = document.createElement('ul');
@@ -427,6 +430,13 @@
             ul.appendChild(li);
           });
           details.appendChild(ul);
+        }
+
+        // Blurb
+        if (item.blurb) {
+          const p = document.createElement('p');
+          p.textContent = item.blurb;
+          details.appendChild(p);
         }
 
         // Tags
