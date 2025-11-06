@@ -127,47 +127,68 @@
   <main class="page" id="top">
     <header class="page-header">
       <h1>Work</h1>
-      <p>Coming soon. See https://www.linkedin.com/in/angad-singh-josan/ in the meantime</p>
+      <section id="list1" class="list"></section>
+      <div id="empty1" class="empty" style="display:none;">No work experiences yet. Add entries in the data section in this file.</div>
     </header>
-
-    <section id="list" class="list"></section>
-
-    <div id="empty" class="empty" style="display:none;">No work experiences yet. Add entries in the data section in this file.</div>
   </main>
 
   <a href="#top" class="to-top" aria-label="Back to top">Top</a>
 
   <script>
-    // Data model:
-    // {
-    //   role: "",
-    //   company: "",
-    //   date: "",           // e.g., "Summer 2025", "2024–2025"
-    //   location: "",       // optional
-    //   summary: "",        // optional short summary
-    //   bullets: ["..."],   // optional
-    //   tags: ["AI","Ops"],// optional
-    // }
+    // fix up the look of the data
+    // internships: ClassProxima, Cambridge, KAGS
+    // leadership: 425 Tutoring, Hack Club
+    // then move all of this to nextjs with tailwind, setup the CI/CD
+    // do writings.html and recommendations.html
 
     const WORK = [
-      // Example:
-      // {
-      //   role: "Software Engineer Intern",
-      //   company: "Startup XYZ",
-      //   date: "Summer 2025",
-      //   location: "SF Bay Area, CA",
-      //   summary: "Shipped features across the stack for an AI tool.",
-      //   bullets: [
-      //     "Built image-processing pipeline with OpenCV + Python",
-      //     "Cut API latency ~40% by batching and caching"
-      //   ],
-      //   tags: ["Python", "OpenCV", "AWS"]
-      // }
+      {
+        role: "Software Engineer Intern",
+        company: "ClassProxima",
+        date: "Summer 2024",
+        location: "Bellevue, WA",
+        summary: "Improved daily video summary for parents in childcare centers using SoTA contrastive learning models saving 520+ hours in annual review time",
+        bullets: [
+          "Architected AI daily video summary system for parents in childcare centers saving 520+ hours in annual review time",
+          "Built scalable image pipeline for extraction, Amazon Web Services based storage (S3), and model training (EC2)",
+          "Fine-tuned CLIP models with PyTorch, achieving 83% accuracy on proprietary datasets with W&B monitoring",
+          "Reduced inference latency by 57% on CLIP models through quantization, batching, and PCA embedding compression",
+          "Performed code review on 15+ pull requests on Git-based version control system, learned SDLC in team environment"
+        ],
+        tags: ["PyTorch", "AWS", "Python", "Computer Vision", "Machine Learning", "Java"]
+      },
+      {
+        role: "ML Research",
+        company: "Cambridge University",
+        date: "Summer 2024",
+        location: "Bellevue, WA",
+        summary: "",
+        bullets: [
+          "Built and trained BERT models on 500,000+ record multilingual social media dataset of ethnic minority discourse",
+          "Engineered data cleaning pipeline, utilized NumPy and Pandas to process tokenization and feature extraction",
+          "Achieved 12% improvement in entity lexical smoothing accuracy through finetuning with Tensorflow",
+          "Selected for competitive Cambridge NLP research program from 4200+ applicants, awarded STEM Merit scholarship"
+        ],
+        tags: ["TensorFlow", "NLP", "Python", "Machine Learning"]
+      },
+      {
+        role: "Part-time Software Engineer",
+        company: "Cambridge University",
+        date: "August 2020 - Present",
+        location: "Bellevue, WA",
+        summary: "",
+        bullets: [
+          "Spearheaded and architected automated cloud-based HR system to transition company’s HR from paper to digital, use Microsoft Power Platform, 2000+ hours saved annually in manual HR document creation and review",
+          "Developed secure data storage pipeline to manage 1900+ employee records digitally with role-based data security",
+          "Streamlined 15+ HR workflows through automation, demonstrating operational excellence with 99.3% uptime"
+        ],
+        tags: ["Microsoft Power Platform", "Cloud", "Automation"]
+      }
     ];
     
-    function renderList(items) {
-      const list = document.getElementById('list');
-      const empty = document.getElementById('empty');
+    function renderList(items, listId, emptyId) {
+      const list = document.getElementById(listId);
+      const empty = document.getElementById(emptyId);
       list.innerHTML = '';
 
       if (!items || items.length === 0) {
@@ -181,7 +202,7 @@
         card.className = 'card';
 
         const title = document.createElement('h3');
-        title.textContent = `${item.role || 'Title'} — ${item.company || 'Company'}`;
+        title.textContent = `${item.role || 'Title'}, ${item.company || 'Company'}`;
 
         const meta = document.createElement('div');
         meta.className = 'meta';
@@ -226,7 +247,7 @@
       });
     }
 
-    //renderList(WORK);
+    renderList(WORK, 'list1', 'empty1');
   </script>
 </body>
 </html>
