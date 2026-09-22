@@ -1,0 +1,7 @@
+node_modules/
+.cache/
+_site/
+.env
+.env.*
+
+assets/galley/

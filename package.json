@@ -1,0 +1,20 @@
+{
+  "name": "angadjosan-website",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "galley:sync": "node scripts/sync-galley.mjs",
+    "galley:connect": "node scripts/connect-galley.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "preview": "python3 -m http.server 8765 --bind 127.0.0.1"
+  },
+  "dependencies": {
+    "he": "1.2.0",
+    "marked": "18.0.13",
+    "sanitize-html": "2.17.7"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "server": "https://galley-app.fly.dev",
+  "publishCheckpoint": "Publish to angadjosan.com",
+  "unpublishCheckpoint": "Unpublish from angadjosan.com"
+}
