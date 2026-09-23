@@ -100,3 +100,11 @@ test('missing projects and ambiguous INTRO documents fail closed', async () => {
     {docId:'A',path:'website/INTRO',title:'INTRO'}, {docId:'B',path:'website/other',title:'INTRO'}]}};
   await assert.rejects(collectPosts(api,config),/exactly one/);
 });
+
+test('Galley identity frontmatter never reaches intro or article output', async () => {
+  const metadata='---\ngalley: document-private-id\nowner: u-example\n---\n';
+  assert.equal(renderIntro(metadata+'# INTRO\n\nWriting **things**'), '<p>Writing <strong>things</strong></p>\n');
+  const article=await render(metadata+'# Post\n\nBody text.\n\n---\n\nMore text.');
+  assert.equal(article.title,'Post');assert(article.html.includes('<hr'));
+  assert(!/galley:|owner:|document-private-id/.test(article.html));
+});

@@ -38,7 +38,7 @@ test('real Galley server: publish snapshot, preserve draft, copy image, then unp
       return new Response(response.rawPayload,{status:response.statusCode,headers:response.headers});
     }});
     const result=await collectPosts(api,config);
-    assert(result.introHtml.includes('<strong>introduction</strong>'));assert(!result.introHtml.includes('Private intro'));
+    assert(result.introHtml.includes('<strong>introduction</strong>'));assert(!/galley:|owner:|INTRO/.test(result.introHtml));assert(!result.introHtml.includes('Private intro'));
     assert.equal(result.posts.length,1);assert.equal(result.posts[0].title,'Published title');assert(result.posts[0].html.includes('published paragraph'));
     assert(!result.posts[0].html.includes('Do not publish'));assert.equal(result.assetFiles.size,1);
     await mutate(`/v1/docs/${doc.docId}/checkpoints`,{name:config.unpublishCheckpoint});

@@ -91,9 +91,15 @@ export function cleanIntroHtml(html) {
   });
 }
 
+// Galley's clean Markdown still includes its YAML identity/owner preamble.
+// Remove only a delimited block at the start; preserve body horizontal rules.
+function documentBody(content) {
+  return content.replace(/^\uFEFF?---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/, '');
+}
+
 export function renderIntro(content, name = 'INTRO') {
   if (typeof content !== 'string') throw new Error('Galley returned an invalid INTRO document.');
-  const tokens = markdown.lexer(content);
+  const tokens = markdown.lexer(documentBody(content));
   const first = tokens.find(t => t.type !== 'space');
   // Galley uses the first heading as the document name. It is not intro copy.
   if (first?.type === 'heading' && plainInline(first.text).toLowerCase() === name.toLowerCase()) tokens.splice(tokens.indexOf(first), 1);
@@ -108,7 +114,7 @@ function plainInline(text) {
 
 export async function renderArticle(content, { server, getImage, assetFiles }) {
   if (typeof content !== 'string' || !content.trim()) throw new Error('The published Galley version is empty.');
-  const tokens = markdown.lexer(content);
+  const tokens = markdown.lexer(documentBody(content));
   const first = tokens.find(t => t.type !== 'space');
   // Title comes from the published snapshot, never from a later draft's metadata.
   if (first?.type !== 'heading' || first.depth !== 1) throw new Error('Give the article a Heading 1 title in Galley before publishing.');
