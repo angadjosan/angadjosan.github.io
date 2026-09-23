@@ -18,10 +18,13 @@ test('build publishes blog HTML/previews only, excludes secrets and removes with
     for(const name of ['about.html','contact.html','privacy-policy.html','work.html','resume.pdf','CNAME'])fs.copyFileSync(name,path.join(root,name));
     fs.writeFileSync(path.join(root,'.env'),'SECRET=never-publish');
     fs.writeFileSync(path.join(root,'.cache/galley/posts.json'),JSON.stringify([{slug:'post-fixture',title:'Article title',summary:'Preview text',date:'September 21, 2026',html:'<h2>Heading</h2><p>Text <strong>bold</strong>.</p><script>bad()</script>'}]));
+    fs.writeFileSync(path.join(root,'.cache/galley/intro.json'),JSON.stringify({html:'<p>My <em>custom intro</em> <a href="https://example.com">link</a>.</p><img src="bad"><script>bad()</script>'}));
     const build=()=>execFileSync(process.execPath,['scripts/build.mjs','--out','_site'],{cwd:root});
     build();
     const output=path.join(root,'_site');
     assert(fs.readFileSync(path.join(output,'index.html'),'utf8').includes('Preview text'));
+    const home=fs.readFileSync(path.join(output,'index.html'),'utf8');
+    assert(home.includes('<em>custom intro</em>'));assert(home.includes('href="https://example.com"'));assert(!home.includes('<script>'));assert(!home.includes('src="bad"'));
     assert(fs.readFileSync(path.join(output,'writing.html'),'utf8').includes('Article title'));
     const article=fs.readFileSync(path.join(output,'writing/post-fixture.html'),'utf8');
     assert(article.includes('<strong>bold</strong>'));assert(!article.includes('<script>'));

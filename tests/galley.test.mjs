@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { apiClient, publication, renderArticle, collectPosts, cleanHtml } from '../scripts/galley.mjs';
-const config = { server: 'https://galley.example', publishCheckpoint: 'Publish to angadjosan.com', unpublishCheckpoint: 'Unpublish from angadjosan.com' };
+import { apiClient, publication, renderArticle, collectPosts, cleanHtml, renderIntro } from '../scripts/galley.mjs';
+const config = { server: 'https://galley.example', project: 'website', introDocument: 'INTRO', publishCheckpoint: 'Publish to angadjosan.com', unpublishCheckpoint: 'Unpublish from angadjosan.com' };
 const event = (name, ticket, at = `2026-09-${String(ticket).padStart(2,'0')}T12:00:00Z`) => ({name, ticket, at});
 const publicationEvent = event(config.publishCheckpoint, 2);
 const render = (content, opts = {}) => renderArticle(content, {server:config.server, assetFiles:new Map(), getImage:async()=>{throw Error('Unexpected image request');}, ...opts});
@@ -44,7 +44,8 @@ test('imports the selected snapshot, not the current draft, and keeps URLs stabl
   const routes=[];
   const api={json:async route=>{
     routes.push(route);
-    if(route==='/v1/docs')return {documents:[{docId:'ABC123',title:'Unpublished title'},{docId:'DRAFT',title:'Secret draft'}]};
+    if(route==='/v1/projects')return {projects:[{path:'website'}]};
+    if(route==='/v1/docs?prefix=website%2F')return {documents:[{docId:'ABC123',path:'website/post',title:'Unpublished title'},{docId:'DRAFT',path:'website/draft',title:'Secret draft'}]};
     if(route==='/v1/docs/ABC123/history?limit=1')return {checkpoints:[publicationEvent]};
     if(route==='/v1/docs/DRAFT/history?limit=1')return {checkpoints:[]};
     if(route==='/v1/docs/ABC123/history/2')return {revision:{ticket:1,content:'# Published title\n\nPublished body'}};
@@ -56,7 +57,8 @@ test('imports the selected snapshot, not the current draft, and keeps URLs stabl
 });
 
 test('a failed document read fails the whole sync instead of deleting published posts',async()=>{
-  const api={json:async route=>{if(route==='/v1/docs')return {documents:[{docId:'ABC'}]};throw Error('HTTP 503')}};
+  const api={json:async route=>{if(route==='/v1/projects')return {projects:[{path:'website'}]};
+    if(route==='/v1/docs?prefix=website%2F')return {documents:[{docId:'ABC',path:'website/post'}]};throw Error('HTTP 503')}};
   await assert.rejects(collectPosts(api,config),/503/);
 });
 
@@ -65,4 +67,35 @@ test('API requests keep credentials on the configured origin and do not follow r
   const api=apiClient({server:config.server,token:'test-secret',fetchImpl:async(url,options)=>{request={url:String(url),options};return new Response('{"documents":[]}',{headers:{'content-type':'application/json'}})}});
   await api.json('/v1/docs');assert.equal(request.url,'https://galley.example/v1/docs');assert.equal(request.options.redirect,'error');assert.equal(request.options.headers.Authorization,'Bearer test-secret');
   await assert.rejects(api.json('https://evil.example'),/Invalid/);
+});
+
+test('INTRO preserves inline formatting, removes its title, images and unsafe markup', () => {
+  const html=renderIntro('# INTRO\n\nI build **tools**, *write*, and [learn](https://example.com).\n\n![Photo](/v1/assets/private)\n\n<script>bad()</script>\n\n<a href="javascript:bad()">Unsafe</a>');
+  assert(html.includes('<strong>tools</strong>'));assert(html.includes('<em>write</em>'));assert(html.includes('href="https://example.com"'));
+  assert(!/INTRO|<h[1-6]|<img|script|javascript|private/.test(html));
+  assert.throws(()=>renderIntro('# INTRO'),/needs some introduction/);
+});
+
+test('project isolation and live INTRO work without a publication checkpoint', async () => {
+  const routes=[];
+  const api={json:async route=>{
+    routes.push(route);
+    if(route==='/v1/projects')return {projects:[{path:'website',name:'Website'}]};
+    if(route==='/v1/docs?prefix=website%2F')return {documents:[
+      {docId:'INTRO',path:'website/untitled-id',title:'INTRO'},
+      {docId:'OTHER',path:'website-other/post',title:'Other'},
+      {docId:'PERSONAL',path:'personal/post',title:'Personal'}]};
+    if(route==='/v1/docs/INTRO')return {content:'# INTRO\n\nLatest **intro**.'};
+    throw Error(`Unexpected route: ${route}`);
+  }};
+  const result=await collectPosts(api,config);
+  assert.equal(result.posts.length,0);assert(result.introHtml.includes('<strong>intro</strong>'));
+  assert.equal(routes.length,3);
+});
+
+test('missing projects and ambiguous INTRO documents fail closed', async () => {
+  await assert.rejects(collectPosts({json:async()=>({projects:[]})},config),/missing or inaccessible/);
+  const api={json:async route=>route==='/v1/projects'?{projects:[{path:'website'}]}:{documents:[
+    {docId:'A',path:'website/INTRO',title:'INTRO'}, {docId:'B',path:'website/other',title:'INTRO'}]}};
+  await assert.rejects(collectPosts(api,config),/exactly one/);
 });

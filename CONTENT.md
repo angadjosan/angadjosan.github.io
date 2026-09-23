@@ -1,10 +1,18 @@
 # Writing with Galley
 
-Write blog posts in [Galley](https://galley-app.fly.dev). You do not need to write Markdown, HTML, or edit a JSON file.
+Write blog posts in the **Website** project in [Galley](https://galley-app.fly.dev). You do not need to write Markdown, HTML, or edit a JSON file.
+
+## Where to put content
+
+Select **Website** in Galley's project picker. Its API path is `website`, and it is linked to `angadjosan/angadjosan.github.io`. Create your blog documents directly inside this project; no extra folder is needed. Documents in other projects are never imported, even if they have a publishing checkpoint.
+
+Create one document named **INTRO** in the same project for the homepage introduction. In Galley, make its first line a Heading 1 named `INTRO` (this names the document), then write your introduction in normal paragraphs below it. The website leaves out that title and displays only your introduction. Links, bold, italic, underline, and other inline emphasis work; images and heading styles are omitted. You do not need to write Markdown.
+
+INTRO uses the latest saved text on each sync, without a publication checkpoint. It never appears as a blog post. Until INTRO exists, the website retains its built-in introduction. An empty INTRO or duplicate INTRO documents stops deployment with an error instead of publishing an ambiguous or empty introduction. Renaming or moving INTRO out of Website restores the built-in introduction at the next sync.
 
 ## Publish a post
 
-1. Create a document in Galley. Make the first line your title using the **Heading 1** toolbar style.
+1. Create a document inside **Website** in Galley. Make the first line your title using the **Heading 1** toolbar style.
 2. Write below it using normal paragraphs, headings, bold, italic, lists, links, tables, quotes, code blocks, and uploaded images.
 3. Wait for Galley to show that your changes are saved.
 4. Open **File → Version history**.
@@ -20,7 +28,7 @@ Keep editing normally. Those edits stay drafts until you save another version na
 
 To take a post off the site, save a version named **Unpublish from angadjosan.com**. It disappears on the next successful deployment. Publishing again restores it at the same URL. Trashing a document in Galley also removes it at the next successful sync. Prefer the named Unpublish version when keeping the document as a draft.
 
-Only documents with the exact publishing label enter the blog. Projects and other website pages are not imported from Galley. A network, authentication, image, or conversion failure stops deployment and leaves the currently deployed site intact.
+Only documents inside **Website** with the exact publishing label enter the blog (except INTRO, which is reserved for the homepage). Projects and other website pages are not imported from Galley. A network, authentication, image, or conversion failure stops deployment and leaves the currently deployed site intact.
 
 Uploaded PNG, JPEG, GIF, WebP, and AVIF images are copied into the static site. Public HTTPS image URLs can also be used, but remain hosted at their original source. Export Mermaid diagrams and Galley design canvases to an image and insert that image before publishing; those specialized blocks are not rendered by this blog importer.
 

@@ -81,6 +81,27 @@ export function cleanHtml(html) {
   });
 }
 
+export function cleanIntroHtml(html) {
+  return sanitizeHtml(html, {
+    allowedTags: ['p', 'br', 'a', 'strong', 'em', 'b', 'i', 'u', 's', 'del', 'mark', 'sub', 'sup', 'code'],
+    allowedAttributes: { a: ['href', 'title', 'rel'] },
+    allowedSchemes: ['https', 'http', 'mailto'],
+    allowProtocolRelative: false,
+    transformTags: { a: (tagName, attrs) => ({ tagName, attribs: { ...attrs, rel: 'noopener noreferrer' } }) },
+  });
+}
+
+export function renderIntro(content, name = 'INTRO') {
+  if (typeof content !== 'string') throw new Error('Galley returned an invalid INTRO document.');
+  const tokens = markdown.lexer(content);
+  const first = tokens.find(t => t.type !== 'space');
+  // Galley uses the first heading as the document name. It is not intro copy.
+  if (first?.type === 'heading' && plainInline(first.text) === name) tokens.splice(tokens.indexOf(first), 1);
+  const html = cleanIntroHtml(markdown.parser(tokens));
+  if (!sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} }).trim()) throw new Error('INTRO needs some introduction text before it can be published.');
+  return html;
+}
+
 function plainInline(text) {
   return he.decode(sanitizeHtml(markdown.parseInline(text), { allowedTags: [], allowedAttributes: {} })).replace(/\s+/g, ' ').trim();
 }
@@ -136,13 +157,27 @@ export async function renderArticle(content, { server, getImage, assetFiles }) {
 }
 
 export async function collectPosts(api, config) {
-  const { documents } = await api.json('/v1/docs');
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.project || '')) throw new Error('Set the Galley project path before syncing.');
+  const { projects } = await api.json('/v1/projects');
+  if (!Array.isArray(projects) || !projects.some(p => p.path === config.project)) throw new Error(`Galley project "${config.project}" is missing or inaccessible. The existing site has not been changed.`);
+  const prefix = `${config.project}/`;
+  const { documents } = await api.json(`/v1/docs?prefix=${encodeURIComponent(prefix)}`);
   if (!Array.isArray(documents)) throw new Error('Galley returned an invalid document list.');
   const posts = [], assetFiles = new Map(), ids = new Set();
-  for (const doc of documents) {
+  const scoped = documents.filter(doc => typeof doc.path === 'string' && doc.path.startsWith(prefix));
+  const introName = config.introDocument || 'INTRO';
+  const intros = scoped.filter(doc => doc.title?.trim() === introName || doc.path.slice(prefix.length).replace(/\.md$/i, '') === introName);
+  if (intros.length > 1) throw new Error(`Keep exactly one ${introName} document in the ${config.project} project.`);
+  let introHtml = null;
+  for (const doc of scoped) {
     if (!/^[a-zA-Z0-9_-]+$/.test(doc.docId) || ids.has(doc.docId)) throw new Error('Invalid or duplicate Galley document id.');
     ids.add(doc.docId);
     const ref = encodeURIComponent(doc.docId);
+    if (doc === intros[0]) {
+      const snapshot = await api.json(`/v1/docs/${ref}`);
+      introHtml = renderIntro(snapshot.content, introName);
+      continue;
+    }
     const history = await api.json(`/v1/docs/${ref}/history?limit=1`);
     if (!Array.isArray(history.checkpoints)) throw new Error('Galley returned an invalid publication history.');
     const selected = publication(history.checkpoints, config);
@@ -155,5 +190,5 @@ export async function collectPosts(api, config) {
       date: new Date(selected.first.at).toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' }) });
   }
   posts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt) || a.slug.localeCompare(b.slug));
-  return { posts, assetFiles };
+  return { posts, assetFiles, introHtml };
 }
