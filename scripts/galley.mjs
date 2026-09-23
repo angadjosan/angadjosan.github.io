@@ -96,7 +96,7 @@ export function renderIntro(content, name = 'INTRO') {
   const tokens = markdown.lexer(content);
   const first = tokens.find(t => t.type !== 'space');
   // Galley uses the first heading as the document name. It is not intro copy.
-  if (first?.type === 'heading' && plainInline(first.text) === name) tokens.splice(tokens.indexOf(first), 1);
+  if (first?.type === 'heading' && plainInline(first.text).toLowerCase() === name.toLowerCase()) tokens.splice(tokens.indexOf(first), 1);
   const html = cleanIntroHtml(markdown.parser(tokens));
   if (!sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} }).trim()) throw new Error('INTRO needs some introduction text before it can be published.');
   return html;
@@ -166,7 +166,7 @@ export async function collectPosts(api, config) {
   const posts = [], assetFiles = new Map(), ids = new Set();
   const scoped = documents.filter(doc => typeof doc.path === 'string' && doc.path.startsWith(prefix));
   const introName = config.introDocument || 'INTRO';
-  const intros = scoped.filter(doc => doc.title?.trim() === introName || doc.path.slice(prefix.length).replace(/\.md$/i, '') === introName);
+  const intros = scoped.filter(doc => doc.title?.trim().toLowerCase() === introName.toLowerCase() || doc.path.slice(prefix.length).replace(/\.md$/i, '').toLowerCase() === introName.toLowerCase());
   if (intros.length > 1) throw new Error(`Keep exactly one ${introName} document in the ${config.project} project.`);
   let introHtml = null;
   for (const doc of scoped) {

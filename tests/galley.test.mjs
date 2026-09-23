@@ -74,6 +74,7 @@ test('INTRO preserves inline formatting, removes its title, images and unsafe ma
   assert(html.includes('<strong>tools</strong>'));assert(html.includes('<em>write</em>'));assert(html.includes('href="https://example.com"'));
   assert(!/INTRO|<h[1-6]|<img|script|javascript|private/.test(html));
   assert.throws(()=>renderIntro('# INTRO'),/needs some introduction/);
+  assert.equal(renderIntro('# intro\n\nHello.'), '<p>Hello.</p>\n');
 });
 
 test('project isolation and live INTRO work without a publication checkpoint', async () => {
@@ -82,10 +83,10 @@ test('project isolation and live INTRO work without a publication checkpoint', a
     routes.push(route);
     if(route==='/v1/projects')return {projects:[{path:'website',name:'Website'}]};
     if(route==='/v1/docs?prefix=website%2F')return {documents:[
-      {docId:'INTRO',path:'website/untitled-id',title:'INTRO'},
+      {docId:'INTRO',path:'website/untitled-id',title:'intro'},
       {docId:'OTHER',path:'website-other/post',title:'Other'},
       {docId:'PERSONAL',path:'personal/post',title:'Personal'}]};
-    if(route==='/v1/docs/INTRO')return {content:'# INTRO\n\nLatest **intro**.'};
+    if(route==='/v1/docs/INTRO')return {content:'# intro\n\nLatest **intro**.'};
     throw Error(`Unexpected route: ${route}`);
   }};
   const result=await collectPosts(api,config);

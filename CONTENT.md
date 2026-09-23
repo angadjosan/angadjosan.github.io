@@ -6,7 +6,7 @@ Write blog posts in the **Website** project in [Galley](https://galley-app.fly.d
 
 Select **Website** in Galley's project picker. Its API path is `website`, and it is linked to `angadjosan/angadjosan.github.io`. Create your blog documents directly inside this project; no extra folder is needed. Documents in other projects are never imported, even if they have a publishing checkpoint.
 
-Create one document named **INTRO** in the same project for the homepage introduction. In Galley, make its first line a Heading 1 named `INTRO` (this names the document), then write your introduction in normal paragraphs below it. The website leaves out that title and displays only your introduction. Links, bold, italic, underline, and other inline emphasis work; images and heading styles are omitted. You do not need to write Markdown.
+Create one document named **INTRO** (lowercase `intro` also works) in the same project for the homepage introduction. In Galley, make its first line a Heading 1 named `INTRO` (this names the document), then write your introduction in normal paragraphs below it. The website leaves out that title and displays only your introduction. Links, bold, italic, underline, and other inline emphasis work; images and heading styles are omitted. You do not need to write Markdown.
 
 INTRO uses the latest saved text on each sync, without a publication checkpoint. It never appears as a blog post. Until INTRO exists, the website retains its built-in introduction. An empty INTRO or duplicate INTRO documents stops deployment with an error instead of publishing an ambiguous or empty introduction. Renaming or moving INTRO out of Website restores the built-in introduction at the next sync.
 
